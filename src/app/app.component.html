@@ -1,0 +1,183 @@
+<div class="container">
+  <div class="row align-items-center">
+    <h1>Dictée Musicale</h1>
+    <p class="lead">Bonjour ! Je suis un programme qui invente automatiquement des dictées musicales, te permet de les
+      écouter et de vérifier ce que tu as trouvé en lisant la correction.</p>
+  </div>
+  <div class="row align-items-center bg-light">
+    <div class="col-sm">
+      <h3>Commençons</h3>
+      <p>Pour m'utiliser, voici comment faire&nbsp;: </p>
+      <p>Tu vas d'abord me donner ici les quelques informations dont j'ai besoin pour te proposer une dictée adaptée à
+        ce que tu sais déjà. Tu sais probablement choisir tout(e) seul(e), mais si tu as un doute, demande à un parent,
+        un(e) autre élève ou à ton professeur de t'aider.
+      </p>
+      <p>Voici ce que je dois savoir&nbsp;: </p>
+      <ul>
+        <li>La note la plus basse et la note la plus haute que tu connais</li>
+        <li>L'intervalle maximal possible entre deux notes (seconde = notes conjointes, tierce, quarte, etc.)</li>
+        <li>La longueur de la dictée&nbsp;: je peux pour l'instant te proposer des dictées sur 1 à 4 mesures de 4 temps,
+          soit 4, 8 ou 12 pulsations</li>
+        <li>Les rythmes que je peux te proposer</li>
+      </ul>
+    </div>
+  </div>
+  <div class="row align-items-center">
+    <div class="col-sm">
+      <div class="row align-items-center">
+        <div class="col-sm-1">
+          <div class="row align-items-center">
+            <button class="btn btn-info  btn-block" (click)="adjustLowestNote(+1)">↑</button>
+          </div>
+          <div class="row align-items-center">
+            <div class="col-sm">
+              <div class="badge badge-light"><span>note basse</span></div>
+            </div>
+          </div>
+          <div class="row align-items-center">
+            <button class="btn btn-warning  btn-block" (click)="adjustLowestNote(-1)">↓</button>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <app-score-view [notes]="lowestNote" [isVisible]="true" [displayClef]="true" [displayTimeSignature]="false">
+          </app-score-view>
+        </div>
+        <div class="col-sm-1">
+          <div class="row align-items-center">
+            <button class="btn btn-info  btn-block" (click)="adjustHighestNote(+1)">↑</button>
+          </div>
+          <div class="row align-items-center">
+            <div class="col-sm">
+              <div class="badge badge-light  text-centered"><span>note haute</span></div>
+            </div>
+          </div>
+          <div class="row align-items-center">
+            <button class="btn btn-warning btn-block" (click)="adjustHighestNote(-1)">↓</button>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <app-score-view [notes]="highestNote" [isVisible]="true" [displayClef]="true" [displayTimeSignature]="false">
+          </app-score-view>
+        </div>
+        <div class="col-sm-1">
+          <div class="row align-items-center">
+            <button class="btn btn-info  btn-block" (click)="adjustMaxInterval(+1)">↑</button>
+          </div>
+          <div class="row align-items-center">
+            <div class="col-sm">
+              <div class="badge badge-light"><span>intervalles</span></div>
+            </div>
+          </div>
+          <div class="row align-items-center">
+            <button class="btn btn-warning btn-block" (click)="adjustMaxInterval(-1)">↓</button>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <p>
+            <span *ngFor="let interval of intervals" class="badge badge-secondary text-uppercase">{{interval}}</span>
+          </p>
+        </div>
+        <div class="col-sm-1">
+          <div class="row align-items-center">
+            <button class="btn btn-info  btn-block" (click)="adjustNbBeats(+1)">↑</button>
+          </div>
+          <div class="row align-items-center">
+            <div class="col-sm">
+              <div class="badge badge-light text-centered"><span>pulsations</span></div>
+            </div>
+          </div>
+          <div class="row align-items-center">
+            <button class="btn btn-warning btn-block" (click)="adjustNbBeats(-1)">↓</button>
+          </div>
+        </div>
+        <div class="col-sm-1">
+          <span class="btn btn-secondary btn-block">{{musicSettings.valueSettings.nbBeats}}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row align-items-center">
+    <div *ngFor="let music of totalRhythms; even as e; index as i;">
+      <div style="text-align: center;" [class]="e ? 'bg-light' : ''">
+        <app-score-view [notes]="music" [showOnlyRhythm]="true" [isVisible]="true" [displayClef]="true"
+        [displayTimeSignature]="false"></app-score-view>
+        <input type="checkbox" [checked]="selectedRhyhtms[i]" (change)="selectedRhyhtms[i] = !selectedRhyhtms[i]">
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container bg-light">
+  <div class="row align-items-center">
+    <div class="col-sm-6">
+      <h2>Fabriquons la dictée</h2>
+      <p>Je suis prête ! Quand tu le seras, actionne le bouton "GO" et j'inventerai une dictée</p>
+    </div>
+    <div class=col-sm-1>
+      <div class="row align-items-center">
+        <button class="btn btn-info btn-block" (click)="generateNotes();scroll(solution);">
+          GO
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container" [class]="notes ? 'visible' : 'invisible'">
+  <div class="row align-items-center">
+    <div class="col-sm-6">
+      <p>Voici la première note que tu vas entendre&nbsp;</p>
+    </div>
+    <div class="col-sm-2">
+      <app-score-view [notes]="notes ? notes.slice(0,1) : undefined" [isVisible]="true" [displayClef]="true"
+        [displayTimeSignature]="false"></app-score-view>
+    </div>
+  </div>
+  <div class="row align-items-center">
+    <div class="col-sm-6">
+      <p>...et voici les rhytmes&nbsp;:</p>
+    </div>
+  </div>
+  <div class="row align-items-center">
+    <div class="col-sm">
+      <app-score-view #rhythmOnly [notes]="notes ? notes : undefined" [isVisible]="true" [displayClef]="true"
+        [timeSignature]="musicSettings.valueSettings.timeSignature" [displayTimeSignature]="true"
+        [showOnlyRhythm]="true"></app-score-view>
+    </div>
+  </div>
+</div>
+<div class="container bg-light" [class]="notes ? 'visible' : 'invisible'">
+  <div class="row align-items-center">
+    <div class="col-sm-6">
+      <h2>Écoute</h2>
+      <p>Maintenant, tu peux l'écouter autant de fois que tu le souhaites, puis afficher la correction</p>
+    </div>
+    <div class="col-sm-2">
+      <app-music-play [notes]="notes"></app-music-play>
+    </div>
+  </div>
+  <div #solution class=row align-items-center>
+    <div class="col-sm-6">
+      <app-score-display [notes]="notes" [timeSignature]="musicSettings.valueSettings.timeSignature"
+        [displayClef]="true" [displayTimeSignature]="true">
+      </app-score-display>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm">
+        <p>Quand tu auras fini, retourne en haut de la page pour recommencer, après avoir éventuellement changé les
+          paramètres.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- <router-outlet></router-outlet> -->
+<div class="container">
+  <p><small class="text-muted"><em>Ce programme est &copy; Christophe Migliorini 2020. Il a pu voir le jour grâce
+        aux
+        (ou à cause des) circonstances exceptionnelles du confinement général de la population française décrété en
+        mars 2020, sur une idée et avec l'aide précieuse de Cécile Coqu, musicienne et professeur de formation
+        musicale.</em></small>
+  </p>
+</div>
