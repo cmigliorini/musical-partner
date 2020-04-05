@@ -61,6 +61,7 @@ export class MusicPlayComponent implements OnInit, OnChanges {
       // schedule all chords
       music.getNotes().forEach(note => {
         // Determine current note value
+        // FIXME: use "note timings", e.g. 16n
         let value: number = Tone.Time(note.value.ticks / ticksPerSecond).quantize("64n");
         // ... and pitch
         let pitches: string[] = [];
@@ -79,7 +80,7 @@ export class MusicPlayComponent implements OnInit, OnChanges {
       return;
     }
     if (this.synth == null) {
-      this.synth = new Tone.PolySynth({ maxPolyphony: 4, voice: Tone.Synth }).toDestination();
+      this.synth = new Tone.PolySynth({ maxPolyphony: 5, voice: Tone.Synth }).toDestination();
     }
     if (this.metronomeSynth == null) {
       this.metronomeSynth = new Tone.Synth().toDestination();
