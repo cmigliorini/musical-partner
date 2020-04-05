@@ -202,17 +202,25 @@ export class ScoreViewComponent implements OnInit, OnChanges {
 
       // fine tune stave widths
       this.notes_per_measure.forEach((m, i) => {
-
+        // Precalculate min width using Vex.Flow.Formatter
         let vf = new Vex.Flow.Formatter();
         let voice = new Vex.Flow.Voice({ num_beats: this.timeSignature.beatsPerMeasure, beat_value: Value.WHOLE_TICKS / this.timeSignature.beat.ticks });
         voice.addTickables(m);
         let width = vf.preCalculateMinTotalWidth([voice]);
-        this.staves[i].setX(i == 0 ? 0 : (this.staves[i - 1].getX() + this.staves[i - 1].getWidth()))
-        // TODO:change this, please. This dependence on displayTimeSignature does not  make sense: we need to  understand why the formatter spreads notes so much in certain cases
-        //  TODO: use smaller  value  to calculate multiplication factor : the smaller the smallest value, the smaller the coefficient.
-        this.staves[i].setWidth((i == 0 ? ((this.displayClef ? 30 : 0) + (this.displayTimeSignature ? 30 : 0)) : 0) + width + 30);//* (this.displayTimeSignature ? 2 : 1) );//+ 25);
-      });
+        // Adjust width to accomodate for Vex.Flow's behaviour:
+        // 1- apparently it more or less adjusts the smallest value to a fixed minimal width
+        let minValue: number = m.map(v => v.getTicks().value()).reduce((a, b) => Math.min(a, b));
+        let multiplicationFactor: number = m.length > 1 ? this.multiplicationFactor(minValue) : 1;
+        this.staves[i].setWidth(width * multiplicationFactor
+          // 2- it shrinks 1-note staves to an extreme narrowness
+          + (m.length > 1 ? 30 : 60)
+          // 3- it does not handle clefs and time signature
+          + (i == 0 ? ((this.displayClef ? 30 : 0) + (this.displayTimeSignature ? 30 : 0)) : 0));
 
+        // Set start X based on previous stave
+        // TODO: also allow staves to be stacked on several lines based on an externally provided Max Width
+        this.staves[i].setX(i == 0 ? 0 : (this.staves[i - 1].getX() + this.staves[i - 1].getWidth()))
+      });
       // Add an end bar at the latest stave
       if (!this.computedTimeSignature) {
         this.staves[this.staves.length - 1].setEndBarType(Vex.Flow.Barline.type.END);
@@ -226,6 +234,19 @@ export class ScoreViewComponent implements OnInit, OnChanges {
       this.displayAll();
     }
 
+  }
+  private multiplicationFactor(smallestValueTicks: number): number {
+    if (smallestValueTicks <= Value.SIXTEENTH.ticks) {
+      return 1;
+    } else if (smallestValueTicks <= Value.EIGHTH.ticks) {
+      return 1.2;
+    } else if (smallestValueTicks <= Value.QUARTER.ticks) {
+      return 1.4;
+    } else if (smallestValueTicks <= Value.HALF.ticks) {
+      return 1.8;
+    } else {
+      return 2;
+    }
   }
   ngAfterViewInit() {
     // We need to hook  on to this because displayAll won't work after first call to ngOnChanges()
