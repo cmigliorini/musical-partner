@@ -1,5 +1,5 @@
 <button class="btn btn-success text-capitalize" [disabled]="notes==null" (click)="toggleShowScore()">
-  {{ showScore ? 'Cache' : 'Affiche' }}
+  {{ showScore ? 'Cache la Solution' : 'Affiche la Solution' }}
 </button>
 <app-score-view [notes]="notes" [timeSignature]="timeSignature" [isVisible]="showScore" [displayClef]="true"
  [displayTimeSignature]="true" [showOnlyRhythm]="showOnlyRhythm"></app-score-view>
