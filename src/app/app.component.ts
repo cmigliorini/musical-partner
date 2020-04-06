@@ -29,6 +29,9 @@ export class AppComponent {
   intervals: string[];
   totalRhythms: Music[][];
   selectedRhyhtms: boolean[];
+  // Dirty trick to  export enum to template :/
+  DictationMode = DictationMode;
+  dictationMode: DictationMode;
 
   constructor(private musicgen: MusicGeneratorService) {
     this.musicSettings = new MusicGeneratorSettings;
@@ -60,30 +63,8 @@ export class AppComponent {
   }
   ngOnInit() {
   }
-  generateNotes() {
-    // Temporary initialisation, to test score-view
-    // let i: number = 60;
-    // this.notes = [
-    //   Rhythm.oneNoteRhythm(Note.singleNote(new Pitch(i++), new Value(Value.QUARTER.ticks
-    //     + Value.EIGHTH.ticks
-    //     + Value.SIXTEENTH.ticks
-    //     + Value.THIRTYSECONDTH.ticks
-    //     + Value.SIXTYFOURTH.ticks))),
-    //   Rhythm.oneNoteRhythm(Note.singleNote(new Pitch(i++), Value.SIXTYFOURTH)),
-    //   new Rhythm([Note.singleNote(new Pitch(i++), Value.QUARTER),
-    //   Note.singleNote(new Pitch(i++), Value.EIGHTH),
-    //   Note.singleNote(new Pitch(i++), Value.EIGHTH)]),
-    //   Rhythm.oneNoteRhythm(Note.singleNote(new Pitch(i++), Value.EIGHTH)),
-    //   Rhythm.oneNoteRhythm(Note.singleNote(new Pitch(i++), Value.SIXTEENTH)),
-
-    //   Rhythm.oneNoteRhythm(Note.singleNote(new Pitch(i++), Value.THIRTYSECONDTH)),
-
-    //   Rhythm.oneNoteRhythm(Note.singleNote(new Pitch(i++), Value.SIXTYFOURTH)),
-    //   Rhythm.oneNoteRhythm(Note.singleNote(new Pitch(i++), Value.SIXTYFOURTH)),
-    //   Rhythm.oneNoteRhythm(Note.singleNote(new Pitch(i), Value.QUARTER))
-    // ];
-    //this.notes = this.notesService.getSomeNotes(Clef.Treble, Level.MELODIC_FIRST_YEAR_Q2_TREBLE);
-    // Convert selectedRhythms to an array of accepted rhythms
+  generateNotes(mode: string) {
+    this.updateShowClues(DictationMode[mode]);
     this.musicSettings.valueSettings.allowedRhythms = [];
     this.selectedRhyhtms.forEach((r, i) => { if (r) this.musicSettings.valueSettings.allowedRhythms.push(i) });
     this.notes = this.musicgen.generateNotes(this.musicSettings);
@@ -121,4 +102,13 @@ export class AppComponent {
   scroll(el) {
     el.scrollIntoView();
   }
+
+  updateShowClues(dictationMode: DictationMode) {
+    this.dictationMode = dictationMode;
+  }
+}
+enum DictationMode {
+  Rhythmic,
+  Melodic,
+  Global
 }
