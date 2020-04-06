@@ -39,7 +39,7 @@ export class MusicPlayComponent implements OnInit, OnChanges {
 
     console.debug('starting play at ' + time);
     // if we need to add a metronome, we'll  generate a loop
-    if (true || this.addMetronome) {
+    if (this.addMetronome) {
       let metronomeStartTime: number = time;
       // Total number of beats
       const nbTotalTicks: number = this.notes.map(v => v.getSpan()).reduce((s, t) => s + t);
