@@ -193,12 +193,14 @@
         [displayTimeSignature]="false"></app-score-view>
     </div>
   </div>
-  <div class="row align-items-center" [style]="(dictationMode == DictationMode.Melodic ? 'display:block;' : 'display:none;')">
+  <div class="row align-items-center"
+    [style]="(dictationMode == DictationMode.Melodic ? 'display:block;' : 'display:none;')">
     <div class="col-sm">
-      Et voici les  rythmes
+      Et voici les rythmes
     </div>
   </div>
-  <div class="row align-items-center" [style]="(dictationMode == DictationMode.Melodic ? 'display:block;' : 'display:none;')">
+  <div class="row align-items-center"
+    [style]="(dictationMode == DictationMode.Melodic ? 'display:block;' : 'display:none;')">
     <div class="col-sm">
       <app-score-view #rhythmOnly [notes]="notes ? notes : undefined" [displayClef]="true"
         [timeSignature]="musicSettings.valueSettings.timeSignature" [displayTimeSignature]="true"
@@ -213,33 +215,41 @@
   </div>
   <div class="row mt-2 pt-2">
     <div class="col-sm-6">
-      <p>Maintenant, tu peux écouter la dictée autant de fois que tu le souhaites, puis afficher la solution.</p>
+      <p>Maintenant, tu peux écouter la dictée autant de fois que tu le souhaites...<br>... puis afficher la solution.
+      </p>
     </div>
     <div class="col-sm-2">
-      <app-music-play [notes]="notes" [addMetronome]="dictationMode!=DictationMode.Melodic"></app-music-play>
+      <div class="row align-items-center">
+        <app-music-play  class="container" [notes]="notes" [addMetronome]="dictationMode!=DictationMode.Melodic"></app-music-play>
+      </div>
+      <div class="row align-items-center">
+        <button class="btn btn-block btn-success text-capitalize" [disabled]="notes==null" (click)="toggleShowSolution()">
+          {{ showSolution ? 'Cache la Solution' : 'Affiche la Solution' }}
+        </button>
+      </div>
     </div>
   </div>
-  <div #solution class="row align-items-center ">
-    <div class="col-sm">
-      <app-score-display [notes]="notes" [timeSignature]="musicSettings.valueSettings.timeSignature" [displayClef]="true"
-      [displayTimeSignature]="true">
-    </app-score-display>
+    <div #solution class="row align-items-center ">
+      <div class="col-sm">
+        <app-score-view [notes]="notes" [timeSignature]="musicSettings.valueSettings.timeSignature" [displayClef]="true"
+          [displayTimeSignature]="true" [isVisible]="showSolution">
+        </app-score-view>
+      </div>
+    </div>
   </div>
-</div>
-</div>
-<div class="container">
-  <div class="row">
-    <div class="col-sm">
-      <p>Quand tu auras fini, retourne en haut de la page pour recommencer, après avoir éventuellement changé les
-        paramètres.</p>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm">
+        <p>Quand tu auras fini, retourne en haut de la page pour recommencer, après avoir éventuellement changé les
+          paramètres.</p>
       </div>
     </div>
   </div>
 
-<div class="container">
-  <p><small class="text-muted"><em>&copy; Christophe Migliorini 2020. Ce site a pu voir le jour grâce aux
-        (ou à cause des) circonstances exceptionnelles du confinement général de la population française décrété en
-        mars 2020, sur une idée et avec l'aide précieuse de Cécile Coqu, musicienne et professeur de formation
-        musicale.</em></small>
-  </p>
-</div>
+  <div class="container">
+    <p><small class="text-muted"><em>&copy; Christophe Migliorini 2020. Ce site a pu voir le jour grâce aux
+          (ou à cause des) circonstances exceptionnelles du confinement général de la population française décrété en
+          mars 2020, sur une idée et avec l'aide précieuse de Cécile Coqu, musicienne et professeur de formation
+          musicale.</em></small>
+    </p>
+  </div>
