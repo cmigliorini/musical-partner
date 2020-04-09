@@ -220,9 +220,10 @@ export class ScoreViewComponent implements OnInit, OnChanges {
         // TODO: also allow staves to be stacked on several lines based on an externally provided Max Width
         this.staves[i].setX(i == 0 ? 0 : (this.staves[i - 1].getX() + this.staves[i - 1].getWidth()))
       });
-      // Add an end bar at the latest stave
+      // Add an end bar at the latest stave and provide room for it
       if (!this.computedTimeSignature) {
         this.staves[this.staves.length - 1].setEndBarType(Vex.Flow.Barline.type.END);
+        this.staves[this.staves.length - 1].setWidth(this.staves[this.staves.length - 1].getWidth() + 20);
       }
 
       // Now display them all!
