@@ -33,7 +33,6 @@ export class ScoreViewComponent implements OnInit, OnChanges {
 
   // TODO: try to make this dynamic, based on stave content
   DEFAULT_STAVE_WIDTH: number = 300;
-  beams: Vex.Flow.Beam[];
 
 
   private readonly note_names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -225,10 +224,6 @@ export class ScoreViewComponent implements OnInit, OnChanges {
       if (!this.computedTimeSignature) {
         this.staves[this.staves.length - 1].setEndBarType(Vex.Flow.Barline.type.END);
       }
-      // Lastly, we'll create beams
-      this.beams = [];
-      this.notes_per_measure.forEach(notes =>
-        this.beams = this.beams.concat(Vex.Flow.Beam.generateBeams(notes.filter(note => note.getTuplet() === null))));
 
       // Now display them all!
       this.displayAll();
