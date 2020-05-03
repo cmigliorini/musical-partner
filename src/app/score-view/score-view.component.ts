@@ -22,6 +22,7 @@ export class ScoreViewComponent implements OnInit, OnChanges {
   @Input() displayClef: boolean;
   @Input() displayTimeSignature: boolean;
   @Input() showOnlyRhythm?: boolean;
+  @Input() hideStems?: boolean;
   computedTimeSignature: boolean;
 
   // Internals : staves, beams and notes chunked by measure
@@ -173,15 +174,21 @@ export class ScoreViewComponent implements OnInit, OnChanges {
             keys: noteKeys,
             duration: duration
           });
+          if (this.hideStems) {
+            baseNote.setStemStyle({ fillStyle: "none", strokeStyle: "none" });
+            baseNote.setFlagStyle({ fillStyle: "none", strokeStyle: "none" });
+          }
           //keys: note.chord.map(scaleNote => this.note_height(music.getScale().toPitch(scaleNote).key)),
 
           // number of dots TODO: this is ugly
-          let nbDots = duration.includes('d') ?
-            1 + duration.lastIndexOf('d') - duration.indexOf('d')
-            : 0;
-          range(0, nbDots).forEach(() =>
-            baseNote.addDotToAll()
-          );
+          if (!this.hideStems) {
+            let nbDots = duration.includes('d') ?
+              1 + duration.lastIndexOf('d') - duration.indexOf('d')
+              : 0;
+            range(0, nbDots).forEach(() =>
+              baseNote.addDotToAll()
+            );
+          }
           // Do we have accidentals
           // TODO: this will have to come with more sematics injected into this component (key, etc.) so
           // we know when to add accidentals and which accidentals to use.
@@ -219,6 +226,12 @@ export class ScoreViewComponent implements OnInit, OnChanges {
         // Set start X based on previous stave
         // TODO: also allow staves to be stacked on several lines based on an externally provided Max Width
         this.staves[i].setX(i == 0 ? 0 : (this.staves[i - 1].getX() + this.staves[i - 1].getWidth()))
+        // if (this.hideStems){
+        //   this.staves[i].setEndBarType(Vex.Flow.Barline.type.NONE);
+        //   if (i>0) {
+        //     this.staves[i].setBegBarType(Vex.Flow.Barline.type.NONE);
+        //   }
+        // }  
       });
       // Add an end bar at the latest stave and provide room for it
       if (!this.computedTimeSignature) {
@@ -264,7 +277,7 @@ export class ScoreViewComponent implements OnInit, OnChanges {
     // Draw measures
     this.staves.forEach((stave, i) => {
       stave.setContext(ctx).draw();
-      Vex.Flow.Formatter.FormatAndDraw(ctx, stave, this.notes_per_measure[i], { auto_beam: true, align_rests: true });
+      Vex.Flow.Formatter.FormatAndDraw(ctx, stave, this.notes_per_measure[i], { auto_beam: !this.hideStems, align_rests: true });
     });
     // Compute total dimensions
     // TODO: find out why we need this bloody 10
