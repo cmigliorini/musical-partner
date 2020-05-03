@@ -168,20 +168,23 @@ export class ScoreViewComponent implements OnInit, OnChanges {
           if (this.showOnlyRhythm) {
             noteKeys = note.value.ticks >= Value.HALF.ticks ? ['b/4/x3'] : ['x/'];
           } else {
-            noteKeys = note.chord.map(scaleNote => this.note_height(music.getScale().toPitch(scaleNote).key));
+            noteKeys = note.chord.map(scaleNote => this.note_height(music.getScale().toPitch(scaleNote).key) 
+              // change note head if we hide stems
+              + (this.hideStems ? '/d1' : ''));
           }
           let baseNote = new Vex.Flow.StaveNote({
             keys: noteKeys,
             duration: duration
           });
+          // Hide stems and flags
           if (this.hideStems) {
             baseNote.setStemStyle({ fillStyle: "none", strokeStyle: "none" });
             baseNote.setFlagStyle({ fillStyle: "none", strokeStyle: "none" });
           }
-          //keys: note.chord.map(scaleNote => this.note_height(music.getScale().toPitch(scaleNote).key)),
 
-          // number of dots TODO: this is ugly
+          // Add dots unless we don't show stems
           if (!this.hideStems) {
+            // number of dots TODO: this is ugly
             let nbDots = duration.includes('d') ?
               1 + duration.lastIndexOf('d') - duration.indexOf('d')
               : 0;
@@ -201,7 +204,6 @@ export class ScoreViewComponent implements OnInit, OnChanges {
           // Add note to current array
           current_notes_per_measure.push(baseNote);
         });
-
 
         ticks += music.getSpan();
       });
@@ -226,12 +228,6 @@ export class ScoreViewComponent implements OnInit, OnChanges {
         // Set start X based on previous stave
         // TODO: also allow staves to be stacked on several lines based on an externally provided Max Width
         this.staves[i].setX(i == 0 ? 0 : (this.staves[i - 1].getX() + this.staves[i - 1].getWidth()))
-        // if (this.hideStems){
-        //   this.staves[i].setEndBarType(Vex.Flow.Barline.type.NONE);
-        //   if (i>0) {
-        //     this.staves[i].setBegBarType(Vex.Flow.Barline.type.NONE);
-        //   }
-        // }  
       });
       // Add an end bar at the latest stave and provide room for it
       if (!this.computedTimeSignature) {
