@@ -32,6 +32,7 @@ export class AppComponent {
   // Dirty trick to  export enum to template :/
   DictationMode = DictationMode;
   dictationMode: DictationMode;
+  showSolution: boolean = false;
 
   constructor(private musicgen: MusicGeneratorService) {
     this.musicSettings = new MusicGeneratorSettings;
@@ -65,6 +66,7 @@ export class AppComponent {
   }
   generateNotes(mode: string) {
     this.updateShowClues(DictationMode[mode]);
+    this.showSolution = false;
     this.musicSettings.valueSettings.allowedRhythms = [];
     this.selectedRhyhtms.forEach((r, i) => { if (r) this.musicSettings.valueSettings.allowedRhythms.push(i) });
     this.notes = this.musicgen.generateNotes(this.musicSettings);
@@ -106,6 +108,10 @@ export class AppComponent {
   updateShowClues(dictationMode: DictationMode) {
     this.dictationMode = dictationMode;
   }
+  toggleShowSolution() {
+    this.showSolution = !this.showSolution;
+  }
+
 }
 enum DictationMode {
   Rhythmic,

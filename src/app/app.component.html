@@ -4,9 +4,8 @@
       <h1 class="display-1">Dictée Musicale</h1>
       <p class="lead">Bonjour ! Je suis un programme qui invente automatiquement des dictées musicales, te permet de les
         écouter et de vérifier ce que tu as trouvé en lisant la solution.</p>
-      <p>Pour l'intant, je te propose seulement des dictées mélodiques ou globales. Bientôt tu pourras aussi t'essayer à
-        des
-        dictées de rythmes.</p>
+      <p><span class="badge badge-info">Nouveau</span><em>
+          Je sais dorénavant te proposer des dictées de rythmes !</em></p>
     </div>
   </div>
   <div class="row align-items-center">
@@ -131,10 +130,9 @@
         <dd class="col-sm-10">Cette dictée consiste à trouver seulement les hauteurs de notes&nbsp;: je te donne la
           première note, et les rythmes</dd>
         <dt class="col-sm-2">Dictée ryhtmique</dt>
-        <dd class="col-sm-10"><em>(bientôt disponible)</em> Pour celle-ci, tu n'as que les rythmes à trouver&nbsp;: je
-          te
-          donne les notes et la
-          pulsation, à toi de trouver les rythmes</dd>
+        <dd class="col-sm-10">Pour celle-ci, tu n'as que les rythmes à trouver&nbsp;: je te donne les notes et la
+          pulsation, à
+          toi de trouver les rythmes</dd>
         <dt class="col-sm-2">Dictée globale</dt>
         <dd class="col-sm-10">C'est à toi de trouver toute la musique&nbsp;: les notes, et les rythmes. Je ne t'indique
           que la pulsation</dd>
@@ -166,7 +164,7 @@
       </button>
     </div>
     <div class=col-sm-2 style="height:100%;">
-      <button class="btn btn-info btn-block" (click)="generateNotes('Rhythmic');scroll(solution);" disabled>
+      <button class="btn btn-info btn-block" (click)="generateNotes('Rhythmic');scroll(solution);">
         Dictée Rythmique
       </button>
     </div>
@@ -183,26 +181,34 @@
       <h2>Indices</h2>
     </div>
   </div>
-  <div class="row align-items-center mt-2 pt-2">
-
+  <div class="row align-items-center mt-2 pt-2"
+    [style]="(dictationMode == DictationMode.Melodic ? '' : 'display:none;')">
     <div class="col-sm-2">
       <p>Voici la première note que tu vas entendre</p>
     </div>
     <div class="col-sm-2">
       <app-score-view [notes]="notes ? notes.slice(0,1) : undefined" [isVisible]="true" [displayClef]="true"
-        [displayTimeSignature]="false"></app-score-view>
+        [displayTimeSignature]="false" [hideStems]="true"></app-score-view>
     </div>
   </div>
-  <div class="row align-items-center" [style]="(dictationMode == DictationMode.Melodic ? 'display:block;' : 'display:none;')">
+  <div class="row align-items-center"
+    [style]="(dictationMode == DictationMode.Melodic ? 'display:block;' : 'display:none;')">
     <div class="col-sm">
-      Et voici les  rythmes
+      Et voici les rythmes
     </div>
   </div>
-  <div class="row align-items-center" [style]="(dictationMode == DictationMode.Melodic ? 'display:block;' : 'display:none;')">
+  <div class="row align-items-center"
+    [style]="(dictationMode == DictationMode.Rhythmic ? 'display:block;' : 'display:none;')">
     <div class="col-sm">
-      <app-score-view #rhythmOnly [notes]="notes ? notes : undefined" [displayClef]="true"
-        [timeSignature]="musicSettings.valueSettings.timeSignature" [displayTimeSignature]="true"
-        [showOnlyRhythm]="dictationMode==DictationMode.Melodic" [isVisible]="dictationMode==DictationMode.Melodic">
+      Voici les hauteurs des notes que tu vas entendre
+    </div>
+  </div>
+  <div class="row align-items-center"
+    [style]="(dictationMode != DictationMode.Global ? 'display:block;' : 'display:none;')">
+    <div class="col-sm">
+      <app-score-view #clues [hideStems]="dictationMode==DictationMode.Rhythmic" [notes]="notes ? notes : undefined"
+        [displayClef]="true" [timeSignature]="musicSettings.valueSettings.timeSignature" [displayTimeSignature]="true"
+        [showOnlyRhythm]="dictationMode==DictationMode.Melodic" [isVisible]="dictationMode != DictationMode.Global">
       </app-score-view>
     </div>
   </div>
@@ -213,33 +219,43 @@
   </div>
   <div class="row mt-2 pt-2">
     <div class="col-sm-6">
-      <p>Maintenant, tu peux écouter la dictée autant de fois que tu le souhaites, puis afficher la solution.</p>
+      <p>Maintenant, tu peux écouter la dictée autant de fois que tu le souhaites...<br>... puis afficher la solution.
+      </p>
     </div>
     <div class="col-sm-2">
-      <app-music-play [notes]="notes" [addMetronome]="dictationMode!=DictationMode.Melodic"></app-music-play>
+      <div class="row align-items-center">
+        <app-music-play class="container" [notes]="notes" [addMetronome]="dictationMode!=DictationMode.Melodic">
+        </app-music-play>
+      </div>
+      <div class="row align-items-center">
+        <button class="btn btn-block btn-success text-capitalize" [disabled]="notes==null"
+          (click)="toggleShowSolution()">
+          {{ showSolution ? 'Cache la Solution' : 'Affiche la Solution' }}
+        </button>
+      </div>
     </div>
   </div>
   <div #solution class="row align-items-center ">
     <div class="col-sm">
-      <app-score-display [notes]="notes" [timeSignature]="musicSettings.valueSettings.timeSignature" [displayClef]="true"
-      [displayTimeSignature]="true">
-    </app-score-display>
+      <app-score-view [notes]="notes" [timeSignature]="musicSettings.valueSettings.timeSignature" [displayClef]="true"
+        [displayTimeSignature]="true" [isVisible]="showSolution">
+      </app-score-view>
+    </div>
   </div>
-</div>
 </div>
 <div class="container">
   <div class="row">
     <div class="col-sm">
       <p>Quand tu auras fini, retourne en haut de la page pour recommencer, après avoir éventuellement changé les
         paramètres.</p>
-      </div>
     </div>
   </div>
+</div>
 
 <div class="container">
   <p><small class="text-muted"><em>&copy; Christophe Migliorini 2020. Ce site a pu voir le jour grâce aux
         (ou à cause des) circonstances exceptionnelles du confinement général de la population française décrété en
         mars 2020, sur une idée et avec l'aide précieuse de Cécile Coqu, musicienne et professeur de formation
-        musicale.</em></small>
-  </p>
+        musicale. View code on <a href="https://github.com/cmigliorini/musical-partner/" target="_blank"
+          rel="noopener noreferrer">GitHub</a></em></small></p>
 </div>

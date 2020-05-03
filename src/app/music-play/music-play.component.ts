@@ -19,8 +19,18 @@ export class MusicPlayComponent implements OnInit, OnChanges {
   private tempo: number = 50;
 
   constructor() {
+    // This will pretty much create a "clave" sound
+    this.metronomeSynth = new Tone.Synth().toDestination();
+    this.metronomeSynth.portamento = 0;
+    this.metronomeSynth.envelope.attack = 0.01;
+    this.metronomeSynth.envelope.attackCurve = "linear";
+    this.metronomeSynth.envelope.decay = 0.1;
+    this.metronomeSynth.envelope.decayCurve = "exponential";
+    this.metronomeSynth.envelope.sustain = 0.1;
+    this.metronomeSynth.envelope.release = 0.01;
+    this.metronomeSynth.envelope.releaseCurve = "exponential";
+    this.metronomeSynth.oscillator.type = "sine";
   }
-
 
   ngOnInit(): void {
   }
@@ -44,12 +54,13 @@ export class MusicPlayComponent implements OnInit, OnChanges {
       // Total number of beats
       const nbTotalTicks: number = this.notes.map(v => v.getSpan()).reduce((s, t) => s + t);
       const nbTotalBeats: number = nbTotalTicks / Value.WHOLE_TICKS * timeSignatureValue;
-      console.log('nbTotalTicks {}, nbTotalBeats {}', nbTotalTicks, nbTotalBeats);
+      // console.log('nbTotalTicks {}, nbTotalBeats {}', nbTotalTicks, nbTotalBeats);
       let metronomeSynth: Tone.Synth = this.metronomeSynth;
+      
       const beatTime: number = Tone.Time(Value.QUARTER.ticks / ticksPerSecond).quantize("64n");
       Array(nbTotalBeats).fill(1).forEach(i => {
-        metronomeSynth.triggerAttackRelease('g7', '32n', metronomeStartTime);
-        console.log('g7/32n @' + metronomeStartTime.toString());
+        metronomeSynth.triggerAttackRelease('c6', '32n', metronomeStartTime);
+        // console.log('c6/32n @' + metronomeStartTime.toString());
         metronomeStartTime += beatTime;
       });
     }
@@ -66,7 +77,7 @@ export class MusicPlayComponent implements OnInit, OnChanges {
         // ... and pitch
         let pitches: string[] = [];
         note.chord.forEach(scaleNote => pitches.push(music.getScale().toPitch(scaleNote).getEnglishString()));
-        console.log(pitches.toString() + '/' + value.toString() + ' @' + startTime.toString());
+        // console.log(pitches.toString() + '/' + value.toString() + ' @' + startTime.toString());
         // Schedule play
         synth.triggerAttackRelease(pitches, value, startTime);
         startTime += value;
