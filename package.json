@@ -24,7 +24,7 @@
     "rxjs": "~6.5.4",
     "tone": "^14.5.43",
     "tslib": "^1.10.0",
-    "vexflow": "file:../vexflow",
+    "vexflow": "git+ssh://git@github.com/cmigliorini/vexflow.git#1.2.88+autobeamfix",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {
