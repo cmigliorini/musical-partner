@@ -54,13 +54,13 @@ export class MusicPlayComponent implements OnInit, OnChanges {
       // Total number of beats
       const nbTotalTicks: number = this.notes.map(v => v.getSpan()).reduce((s, t) => s + t);
       const nbTotalBeats: number = nbTotalTicks / Value.WHOLE_TICKS * timeSignatureValue;
-      console.log('nbTotalTicks {}, nbTotalBeats {}', nbTotalTicks, nbTotalBeats);
+      // console.log('nbTotalTicks {}, nbTotalBeats {}', nbTotalTicks, nbTotalBeats);
       let metronomeSynth: Tone.Synth = this.metronomeSynth;
       
       const beatTime: number = Tone.Time(Value.QUARTER.ticks / ticksPerSecond).quantize("64n");
       Array(nbTotalBeats).fill(1).forEach(i => {
         metronomeSynth.triggerAttackRelease('c6', '32n', metronomeStartTime);
-        console.log('c6/32n @' + metronomeStartTime.toString());
+        // console.log('c6/32n @' + metronomeStartTime.toString());
         metronomeStartTime += beatTime;
       });
     }
@@ -77,7 +77,7 @@ export class MusicPlayComponent implements OnInit, OnChanges {
         // ... and pitch
         let pitches: string[] = [];
         note.chord.forEach(scaleNote => pitches.push(music.getScale().toPitch(scaleNote).getEnglishString()));
-        console.log(pitches.toString() + '/' + value.toString() + ' @' + startTime.toString());
+        // console.log(pitches.toString() + '/' + value.toString() + ' @' + startTime.toString());
         // Schedule play
         synth.triggerAttackRelease(pitches, value, startTime);
         startTime += value;
