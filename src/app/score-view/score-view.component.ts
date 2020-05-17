@@ -22,7 +22,7 @@ export class ScoreViewComponent implements OnInit, OnChanges {
   @Input() displayClef: boolean;
   @Input() displayTimeSignature: boolean;
   @Input() showOnlyRhythm?: boolean;
-  @Input() hideStems?: boolean;
+  @Input() showOnlyPitches?: boolean;
   computedTimeSignature: boolean;
 
   // Internals : staves, beams and notes chunked by measure
@@ -162,28 +162,35 @@ export class ScoreViewComponent implements OnInit, OnChanges {
         // start light, we don't accept tuplets (in Vex.Flow understanding) so we just flow our notes
         music.getNotes().forEach(note => {
           let duration: string = this.noteDuration(note.value.ticks);
+          if (note.value.isRest) {
+            duration += 'r';
+          }
           // Basic note
           // Let's determine  the headstyle in the case of rhythms only
           let noteKeys: string[];
           if (this.showOnlyRhythm) {
             noteKeys = note.value.ticks >= Value.HALF.ticks ? ['b/4/x3'] : ['x/'];
           } else {
-            noteKeys = note.chord.map(scaleNote => this.note_height(music.getScale().toPitch(scaleNote).key) 
-              // change note head if we hide stems
-              + (this.hideStems ? '/d1' : ''));
+            noteKeys = note.chord.map(scaleNote => this.note_height(music.getScale().toPitch(scaleNote).key)
+            // change note head if we hide stems
+            + (this.showOnlyPitches ? '/d1' : ''));
+          }
+          // All rests are aligned to b/4
+          if (note.value.isRest) {
+            noteKeys = ['b/4'];
           }
           let baseNote = new Vex.Flow.StaveNote({
             keys: noteKeys,
             duration: duration
           });
           // Hide stems and flags
-          if (this.hideStems) {
+          if (this.showOnlyPitches) {
             baseNote.setStemStyle({ fillStyle: "none", strokeStyle: "none" });
             baseNote.setFlagStyle({ fillStyle: "none", strokeStyle: "none" });
           }
 
           // Add dots unless we don't show stems
-          if (!this.hideStems) {
+          if (!this.showOnlyPitches) {
             // number of dots TODO: this is ugly
             let nbDots = duration.includes('d') ?
               1 + duration.lastIndexOf('d') - duration.indexOf('d')
@@ -201,8 +208,10 @@ export class ScoreViewComponent implements OnInit, OnChanges {
               baseNote.addAccidental(i, new Vex.Flow.Accidental('#'));
             }
           });
-          // Add note to current array
-          current_notes_per_measure.push(baseNote);
+          // Add note to current array, unless we showOnlyPitches and this is a rest
+          if (!(this.showOnlyPitches && note.value.isRest)) {
+            current_notes_per_measure.push(baseNote);
+          }
         });
 
         ticks += music.getSpan();
@@ -214,6 +223,10 @@ export class ScoreViewComponent implements OnInit, OnChanges {
         let vf = new Vex.Flow.Formatter();
         let voice = new Vex.Flow.Voice({ num_beats: this.timeSignature.beatsPerMeasure, beat_value: Value.WHOLE_TICKS / this.timeSignature.beat.ticks });
         voice.addTickables(m);
+        // If we show only pitches, we will remove rests so we might have incomplete voices
+        if (this.showOnlyPitches) {
+          voice.setStrict(false);
+        }
         let width = vf.preCalculateMinTotalWidth([voice]);
         // Adjust width to accomodate for Vex.Flow's behaviour:
         // 1- apparently it more or less adjusts the smallest value to a fixed minimal width
@@ -273,7 +286,7 @@ export class ScoreViewComponent implements OnInit, OnChanges {
     // Draw measures
     this.staves.forEach((stave, i) => {
       stave.setContext(ctx).draw();
-      Vex.Flow.Formatter.FormatAndDraw(ctx, stave, this.notes_per_measure[i], { auto_beam: !this.hideStems, align_rests: true });
+      Vex.Flow.Formatter.FormatAndDraw(ctx, stave, this.notes_per_measure[i], { auto_beam: !this.showOnlyPitches, align_rests: false });
     });
     // Compute total dimensions
     // TODO: find out why we need this bloody 10

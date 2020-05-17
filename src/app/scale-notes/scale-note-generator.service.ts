@@ -1,6 +1,7 @@
 import { Injectable, Input } from '@angular/core';
 import { ScaleNote } from './scale-note';
 import { ScaleNoteGeneratorSettings } from './scale-note-generator-settings';
+import { Value } from '../values/value';
 
 @Injectable({
   providedIn: 'root'
@@ -17,25 +18,30 @@ export class ScaleNoteGeneratorService {
   /**
    * generateScaleNotes
    */
-  public generateScaleNotes(nbNotes: number): ScaleNote[] {
-
-    // Generate scaleNotes
-    let currentScaleNote: ScaleNote = null;
+  public generateScaleNotes(values: Value[]): ScaleNote[] {
+    // Generate first note -- so if we have a rest, we can use this.
+    let currentScaleNote: ScaleNote = this.findNextDegree(null);
     let scaleNotes: ScaleNote[] = [];
     let previousInterval: number;
     let currentInterval: number;
-    for (let i: number = 0; i < nbNotes; i++) {
+    values.forEach(value => {
       let nextScaleNote: ScaleNote;
-      // Unless maxInterval==0, we'll retry until we don't have more than 2 successive identical notes
-      // algorithm is ugly but to date i could not find a better one.
-      do {
-        nextScaleNote = this.findNextDegree(currentScaleNote);
-        currentInterval = currentScaleNote ? nextScaleNote.degree - currentScaleNote.degree : undefined;
-      } while (this.settings.maxInterval !== 0 && previousInterval === 0 && currentInterval === 0)
+      if (value.isRest) {
+        nextScaleNote = currentScaleNote;
+      }
+      else {
+        // Unless maxInterval==0, we'll retry until we don't have more than 2 successive identical notes
+        // algorithm is ugly but to date i could not find a better one.
+        do {
+          nextScaleNote = this.findNextDegree(currentScaleNote);
+          currentInterval = currentScaleNote ? nextScaleNote.degree - currentScaleNote.degree : undefined;
+        } while (this.settings.maxInterval !== 0 && previousInterval === 0 && currentInterval === 0)
+      }
+      // Move forward
       currentScaleNote = nextScaleNote;
       previousInterval = currentInterval;
       scaleNotes.push(currentScaleNote);
-    }
+    });
     return scaleNotes;
   }
   private findNextDegree(currentScaleNote: ScaleNote): ScaleNote {

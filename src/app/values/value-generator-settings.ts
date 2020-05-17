@@ -10,7 +10,11 @@ export class ValueGeneratorSettings {
     [Value.EIGHTH, Value.EIGHTH],
     [Value.EIGHTH_DOTTED, Value.SIXTEENTH],
     [Value.QUARTER_DOTTED, Value.EIGHTH],
-    [Value.SIXTEENTH, Value.SIXTEENTH, Value.SIXTEENTH, Value.SIXTEENTH]
+    [Value.SIXTEENTH, Value.SIXTEENTH, Value.SIXTEENTH, Value.SIXTEENTH],
+    [Value.EIGHTH, Value.SIXTEENTH, Value.SIXTEENTH],
+    [Value.SIXTEENTH, Value.SIXTEENTH, Value.EIGHTH],
+    [Value.SIXTEENTH, Value.EIGHTH, Value.SIXTEENTH],
+    [Value.EIGHTH_REST, Value.EIGHTH],
   ];
 
   // Rythm section
@@ -39,7 +43,11 @@ export namespace ValueGeneratorSettings {
     TwoEights,
     EightDottedSixteenth,
     QuarterDottedEight,
-    FourSixteenth
+    FourSixteenth,
+    EighthTwoSixteenths,
+    TwoSixteenthsEighth,
+    Syncopette,
+    EighthRestEighth
   }
   export function getStandardRhythmValues(): string[] {
     return Object.keys(StandardRhythm).map(key => StandardRhythm[key]).filter(value => typeof value === 'string');
