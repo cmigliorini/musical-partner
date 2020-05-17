@@ -23,7 +23,7 @@ export class MusicGeneratorService {
     const valueService = new ValueGeneratorService();
     const scaleNoteService = new ScaleNoteGeneratorService(settings.scaleNoteSettings);
     let rhythm: Value[] = valueService.generateRhythm(settings.valueSettings);
-    let notes: ScaleNote[] = scaleNoteService.generateScaleNotes(rhythm.length);
+    let notes: ScaleNote[] = scaleNoteService.generateScaleNotes(rhythm);
     // zip Values and Pitches into Rhythms
     let music: Music[] = [];
     rhythm.forEach((r, i) =>

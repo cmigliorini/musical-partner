@@ -182,13 +182,13 @@
     </div>
   </div>
   <div class="row align-items-center mt-2 pt-2"
-    [style]="(dictationMode == DictationMode.Melodic ? '' : 'display:none;')">
+    [style]="(dictationMode != DictationMode.Rhythmic ? '' : 'display:none;')">
     <div class="col-sm-2">
       <p>Voici la première note que tu vas entendre</p>
     </div>
     <div class="col-sm-2">
-      <app-score-view [notes]="notes ? notes.slice(0,1) : undefined" [isVisible]="true" [displayClef]="true"
-        [displayTimeSignature]="false" [hideStems]="true"></app-score-view>
+      <app-score-view [notes]="notes ? firstNote : undefined" [isVisible]="true" [displayClef]="true"
+        [displayTimeSignature]="false" [showOnlyPitches]="true"></app-score-view>
     </div>
   </div>
   <div class="row align-items-center"
@@ -206,7 +206,7 @@
   <div class="row align-items-center"
     [style]="(dictationMode != DictationMode.Global ? 'display:block;' : 'display:none;')">
     <div class="col-sm">
-      <app-score-view #clues [hideStems]="dictationMode==DictationMode.Rhythmic" [notes]="notes ? notes : undefined"
+      <app-score-view #clues [showOnlyPitches]="dictationMode==DictationMode.Rhythmic" [notes]="notes ? notes : undefined"
         [displayClef]="true" [timeSignature]="musicSettings.valueSettings.timeSignature" [displayTimeSignature]="true"
         [showOnlyRhythm]="dictationMode==DictationMode.Melodic" [isVisible]="dictationMode != DictationMode.Global">
       </app-score-view>

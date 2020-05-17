@@ -71,15 +71,17 @@ export class MusicPlayComponent implements OnInit, OnChanges {
       // Determine time duration of a whole note, so we can later precisely quantize values
       // schedule all chords
       music.getNotes().forEach(note => {
-        // Determine current note value
-        // FIXME: use "note timings", e.g. 16n
+        // Determine current value
         let value: number = Tone.Time(note.value.ticks / ticksPerSecond).quantize("64n");
-        // ... and pitch
-        let pitches: string[] = [];
-        note.chord.forEach(scaleNote => pitches.push(music.getScale().toPitch(scaleNote).getEnglishString()));
-        // console.log(pitches.toString() + '/' + value.toString() + ' @' + startTime.toString());
-        // Schedule play
-        synth.triggerAttackRelease(pitches, value, startTime);
+        if (!note.value.isRest) {
+          // FIXME: use "note timings", e.g. 16n
+          // ... and pitch, unless it's a rest
+          let pitches: string[] = [];
+          note.chord.forEach(scaleNote => pitches.push(music.getScale().toPitch(scaleNote).getEnglishString()));
+          // console.log(pitches.toString() + '/' + value.toString() + ' @' + startTime.toString());
+          // Schedule play
+          synth.triggerAttackRelease(pitches, value, startTime);
+        }
         startTime += value;
       });
     });

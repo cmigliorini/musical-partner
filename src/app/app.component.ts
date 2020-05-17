@@ -33,6 +33,7 @@ export class AppComponent {
   DictationMode = DictationMode;
   dictationMode: DictationMode;
   showSolution: boolean = false;
+  firstNote: Music[];
 
   constructor(private musicgen: MusicGeneratorService) {
     this.musicSettings = new MusicGeneratorSettings;
@@ -70,6 +71,14 @@ export class AppComponent {
     this.musicSettings.valueSettings.allowedRhythms = [];
     this.selectedRhyhtms.forEach((r, i) => { if (r) this.musicSettings.valueSettings.allowedRhythms.push(i) });
     this.notes = this.musicgen.generateNotes(this.musicSettings);
+    // Extract first note. This will probably break tuples, but we're not going to display this anyway
+    this.firstNote = this.notes
+      // remove rests
+      .map(music => new Music(music.getNotes().filter(note => !note.value.isRest), music.getScale()))
+      // remove empty sequences
+      .filter(music => music.getNotes().length > 0)
+      // Keep only first note
+      .slice(0, 1);
   }
   adjustLowestNote(by: number) {
     if (this.musicSettings.scaleNoteSettings.lowestNote.degree + by > this.musicSettings.scaleNoteSettings.highestNote.degree) {
