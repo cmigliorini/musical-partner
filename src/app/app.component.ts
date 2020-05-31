@@ -35,6 +35,8 @@ export class AppComponent {
   dictationMode: DictationMode;
   showSolution: boolean = false;
   firstNote: Music[];
+  // TODO: bind this to UX switch
+  rhythmicMode: ValueGeneratorSettings.RhythmicMode = ValueGeneratorSettings.RhythmicMode.Binary;
 
   constructor(private musicgen: MusicGeneratorService) {
     this.musicSettings = new MusicGeneratorSettings;
@@ -50,11 +52,11 @@ export class AppComponent {
     this.musicSettings.scaleNoteSettings.nbAccidentals = 0;
     // Value Generator Settings
     this.musicSettings.valueSettings = new ValueGeneratorSettings();
-    //this.musicSettings.valueSettings.allowedRhythms = [ValueGeneratorSettings.StandardRhythm.Quarter, ValueGeneratorSettings.StandardRhythm.QuarterDottedEight];
-    const rhythms: Rhythm[] = ValueGeneratorSettings.getStandardRhythmValues().map(r => ValueGeneratorSettings.getStandardRhythm(r)).map(x => ValueGeneratorSettings.getRhythm(x));
+    // TODO: make this dynamic based on input from switch
+    const rhythms: Rhythm[] = ValueGeneratorSettings.getStandardRhythms(this.rhythmicMode);
     this.selectedRhyhtms = Array(rhythms.length).fill(false);
-    this.selectedRhyhtms[ValueGeneratorSettings.StandardRhythm.Quarter] = true;
-    this.selectedRhyhtms[ValueGeneratorSettings.StandardRhythm.Half] = true;
+    this.selectedRhyhtms[0] = true;
+    this.selectedRhyhtms[1] = true;
     this.totalRhythms = rhythms.map(r => {
       let notes: Chord[] = r.values.map(v => Chord.singleNoteChord(new ScaleNote(5, null)));
       return [new Music(notes, r, new Scale(new ScaleNote(0, null), Mode.Major))];
@@ -70,7 +72,7 @@ export class AppComponent {
     this.updateShowClues(DictationMode[mode]);
     this.showSolution = false;
     this.musicSettings.valueSettings.allowedRhythms = [];
-    this.selectedRhyhtms.forEach((r, i) => { if (r) this.musicSettings.valueSettings.allowedRhythms.push(i) });
+    this.selectedRhyhtms.forEach((r, i) => { if (r) this.musicSettings.valueSettings.allowedRhythms.push(ValueGeneratorSettings.getRhythm(this.rhythmicMode, i)) });
     this.notes = this.musicgen.generateNotes(this.musicSettings);
     // Extract first note. This will probably break tuples, but we're not going to display this anyway
     this.firstNote = [new Music(this.notes

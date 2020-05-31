@@ -24,7 +24,7 @@ describe('ScaleNoteGeneratorService', () => {
 
     let valueGeneratorSettings: ValueGeneratorSettings = new ValueGeneratorSettings();
     valueGeneratorSettings.nbBeats=5000;
-    valueGeneratorSettings.allowedRhythms = ValueGeneratorSettings.getStandardRhythmValues().map(r => ValueGeneratorSettings.getStandardRhythm(r));
+    valueGeneratorSettings.allowedRhythms = ValueGeneratorSettings.getStandardRhythms(ValueGeneratorSettings.RhythmicMode.Binary);
     valueGeneratorSettings.timeSignature= new TimeSignature(4, Value.QUARTER);
     rhythm = new ValueGeneratorService().generateRhythm(valueGeneratorSettings);
   });

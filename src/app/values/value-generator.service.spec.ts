@@ -20,7 +20,7 @@ describe('ValueGeneratorService', () => {
   it('should generate an array of quarter notes', () => {
     let vgSettings: ValueGeneratorSettings = new ValueGeneratorSettings();
     vgSettings.nbBeats = 3;
-    vgSettings.allowedRhythms = [ValueGeneratorSettings.StandardRhythm.Quarter];
+    vgSettings.allowedRhythms = [new Rhythm([Value.QUARTER])];
     vgSettings.timeSignature = new TimeSignature(6, Value.QUARTER);
     expect(service.generateRhythm(vgSettings)).toEqual([new Rhythm([Value.QUARTER]), new Rhythm([Value.QUARTER]), new Rhythm([Value.QUARTER])]);
   })

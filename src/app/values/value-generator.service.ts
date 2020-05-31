@@ -19,8 +19,7 @@ export class ValueGeneratorService {
       // console.debug('-- start with ' + beatsAvailable + ' beats total, ' + beatsAvailableInCurrentMeasure + ' beats in current  measure');
       let newRhythm: Rhythm;
       // available rhythms are those which fit in the remainder of the measure or the total length
-      let avalaibleRhythms: ValueGeneratorSettings.StandardRhythm[] = settings.allowedRhythms.filter(i =>
-        ValueGeneratorSettings.getRhythm(i).span <= Math.min(beatsAvailable, beatsAvailableInCurrentMeasure) * settings.timeSignature.beat.ticks
+      let avalaibleRhythms: Rhythm[] = settings.allowedRhythms.filter(r => r.span <= Math.min(beatsAvailable, beatsAvailableInCurrentMeasure) * settings.timeSignature.beat.ticks
       );
       if (avalaibleRhythms.length === 0) {
         throw new Error('sorry, no rythm available to compleate bar or measure');
@@ -29,7 +28,7 @@ export class ValueGeneratorService {
       do {
         const iRhythm: number = Math.floor(Math.random() * (avalaibleRhythms.length));
         // console.debug('selected rythm index ' + iRhythm);
-        newRhythm = ValueGeneratorSettings.getRhythm(avalaibleRhythms[iRhythm]);
+        newRhythm = avalaibleRhythms[iRhythm];
       } while (newRhythm.span > Math.max(beatsAvailable, beatsAvailableInCurrentMeasure) * settings.timeSignature.beat.ticks);
       // Adjust total beat counter
       beatsAvailable -= newRhythm.span / settings.timeSignature.beat.ticks;
