@@ -4,6 +4,7 @@ import { ValueGeneratorService } from './value-generator.service';
 import { ValueGeneratorSettings } from './value-generator-settings';
 import { Value } from './value';
 import { TimeSignature } from './time-signature';
+import { Rhythm } from '../rhythm/rhythm';
 
 describe('ValueGeneratorService', () => {
   let service: ValueGeneratorService;
@@ -21,6 +22,6 @@ describe('ValueGeneratorService', () => {
     vgSettings.nbBeats = 3;
     vgSettings.allowedRhythms = [ValueGeneratorSettings.StandardRhythm.Quarter];
     vgSettings.timeSignature = new TimeSignature(6, Value.QUARTER);
-    expect(service.generateRhythm(vgSettings)).toEqual([Value.QUARTER, Value.QUARTER, Value.QUARTER]);
+    expect(service.generateRhythm(vgSettings)).toEqual([new Rhythm([Value.QUARTER]), new Rhythm([Value.QUARTER]), new Rhythm([Value.QUARTER])]);
   })
 });

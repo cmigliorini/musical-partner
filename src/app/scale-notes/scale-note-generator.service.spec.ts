@@ -7,10 +7,11 @@ import { ValueGeneratorService } from '../values/value-generator.service';
 import { ValueGeneratorSettings } from '../values/value-generator-settings';
 import { TimeSignature } from '../values/time-signature';
 import { Value } from '../values/value';
+import { Rhythm } from '../rhythm/rhythm';
 
 describe('ScaleNoteGeneratorService', () => {
   let service: ScaleNoteGeneratorService;
-  let rhythm: Value[];
+  let rhythm: Rhythm[];
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
@@ -32,8 +33,8 @@ describe('ScaleNoteGeneratorService', () => {
     expect(service).toBeTruthy();
   });
   it('should create a single note', () => {
-    expect(service.generateScaleNotes([Value.EIGHTH])).toEqual([new ScaleNote(4, null)]);
-    expect(service.generateScaleNotes([Value.EIGHTH, Value.EIGHTH])).toEqual([new ScaleNote(4, null), new ScaleNote(4, null)]);
+    expect(service.generateScaleNotes([new Rhythm([Value.EIGHTH])])).toEqual([new ScaleNote(4, null)]);
+    expect(service.generateScaleNotes([new Rhythm([Value.EIGHTH, Value.EIGHTH])])).toEqual([new ScaleNote(4, null), new ScaleNote(4, null)]);
   });
   it('should implement maxInterval', () => {
     let mySettings: ScaleNoteGeneratorSettings = new ScaleNoteGeneratorSettings();
@@ -67,7 +68,7 @@ describe('ScaleNoteGeneratorService', () => {
     expect(function () { new ScaleNoteGeneratorService(mySettings) }).toThrow();
   });
 });
-function testMinMaxDegreeInterval(mySettings: ScaleNoteGeneratorSettings, rhythm:Value[]) {
+function testMinMaxDegreeInterval(mySettings: ScaleNoteGeneratorSettings, rhythm: Rhythm[]) {
   let scaleNotes: ScaleNote[] = new ScaleNoteGeneratorService(mySettings).generateScaleNotes(rhythm);
   let degrees: number[] = scaleNotes.map(a => a.degree);
   let maxDegree: number = degrees.reduce((a, b) => Math.max(a, b));

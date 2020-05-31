@@ -2,6 +2,7 @@ import { Injectable, Input } from '@angular/core';
 import { ScaleNote } from './scale-note';
 import { ScaleNoteGeneratorSettings } from './scale-note-generator-settings';
 import { Value } from '../values/value';
+import { Rhythm } from '../rhythm/rhythm';
 
 @Injectable({
   providedIn: 'root'
@@ -18,13 +19,13 @@ export class ScaleNoteGeneratorService {
   /**
    * generateScaleNotes
    */
-  public generateScaleNotes(values: Value[]): ScaleNote[] {
+  public generateScaleNotes(rhythm: Rhythm[]): ScaleNote[] {
     // Generate first note -- so if we have a rest, we can use this.
     let currentScaleNote: ScaleNote = this.findNextDegree(null);
     let scaleNotes: ScaleNote[] = [];
     let previousInterval: number;
     let currentInterval: number;
-    values.forEach(value => {
+    rhythm.forEach(r => r.values.forEach(value => {
       let nextScaleNote: ScaleNote;
       if (value.isRest) {
         nextScaleNote = currentScaleNote;
@@ -35,13 +36,14 @@ export class ScaleNoteGeneratorService {
         do {
           nextScaleNote = this.findNextDegree(currentScaleNote);
           currentInterval = currentScaleNote ? nextScaleNote.degree - currentScaleNote.degree : undefined;
-        } while (this.settings.maxInterval !== 0 && previousInterval === 0 && currentInterval === 0)
+        } while (this.settings.maxInterval !== 0 && (this.settings.highestNote.degree != this.settings.lowestNote.degree)
+        && previousInterval === 0 && currentInterval === 0)
       }
       // Move forward
       currentScaleNote = nextScaleNote;
       previousInterval = currentInterval;
       scaleNotes.push(currentScaleNote);
-    });
+    }));
     return scaleNotes;
   }
   private findNextDegree(currentScaleNote: ScaleNote): ScaleNote {

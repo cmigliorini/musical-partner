@@ -1,16 +1,17 @@
 import { Music } from './music';
-import { Note } from './note';
+import { Chord } from './note';
 import { Pitch } from '../models/pitch';
 import { Value } from '../values/value';
 import { ScaleNote } from '../scale-notes/scale-note';
 import { Scale } from './scale';
 import { Mode } from '../scale-notes/mode.enum';
+import { Rhythm } from '../rhythm/rhythm';
 describe('Rythm', () => {
   it('should create an instance from a single note', () => {
-    expect(new Music([Note.singleNote(new ScaleNote(60, null), new Value(4096))], new Scale(new ScaleNote(0, null), Mode.Major))).toBeTruthy();
+    expect(new Music([Chord.singleNoteChord(new ScaleNote(60, null))], new Rhythm([Value.QUARTER]), new Scale(new ScaleNote(0, null), Mode.Major))).toBeTruthy();
   });
   it('should create an instance from a single chord note (constructor)', () => {
-    expect(new Music([new Note([new ScaleNote(60, null), new ScaleNote(60, null)], new Value(4096))], new Scale(new ScaleNote(0, null), Mode.Major))).toBeTruthy();
+    expect(new Music([new Chord([new ScaleNote(60, null), new ScaleNote(60, null)])], new Rhythm([Value.QUARTER]), new Scale(new ScaleNote(0, null), Mode.Major))).toBeTruthy();
   });
   // it('should create an instance from a single chord note (alias)', () => {
   //   expect(Music.oneNoteRhythm(new ScaleNote(60,null)),  new Value(4096)))).toBeTruthy();

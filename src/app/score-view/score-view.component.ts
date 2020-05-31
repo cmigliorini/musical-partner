@@ -118,7 +118,7 @@ export class ScoreViewComponent implements OnInit, OnChanges {
       }
       // We will use a computed time signature, in case it's not provided, but as the computed  value might change we need to know we have to recompute it based on musid
       if (this.timeSignature == null || this.computedTimeSignature) {
-        this.timeSignature = new TimeSignature(this.notes.map(n => n.getSpan()).reduce((a, b) => a + b, 0) / Value.QUARTER.ticks, Value.QUARTER);
+        this.timeSignature = new TimeSignature(this.notes.map(n => n.rhythm.span).reduce((a, b) => a + b, 0) / Value.QUARTER.ticks, Value.QUARTER);
         this.computedTimeSignature = true;
       }
       else {
@@ -147,36 +147,36 @@ export class ScoreViewComponent implements OnInit, OnChanges {
           ticks = 0;
         }
         // First We need to find out whether current_stave will hold our rhythm, or throw
-        if (music.getSpan() > this.timeSignature.getTotalTicks() - ticks) {
-          throw "current rhythm will make current stave overflow:" + music.getSpan() + ' ' + this.timeSignature.getTotalTicks() + ' ' + ticks;
+        if (music.rhythm.span > this.timeSignature.getTotalTicks() - ticks) {
+          throw "current rhythm will make current stave overflow:" + music.rhythm.span + ' ' + this.timeSignature.getTotalTicks() + ' ' + ticks;
         }
         // We're good, let's add the rhythm's notes to current stave
         // rythm->notes->key[] translated to strings + duration -> stavenote
 
         // We don't do tuplets for now
         // TODO: accept tuplets.
-        if (music.getSpan() != music.getNotes().map(n => n.value.ticks).reduce((a, b) => a + b, 0)) {
+        if (music.rhythm.span != music.rhythm.values.map(n => n.ticks).reduce((a, b) => a + b, 0)) {
           throw 'sorry, we don\'t do tuplets for now';
         }
 
         // start light, we don't accept tuplets (in Vex.Flow understanding) so we just flow our notes
-        music.getNotes().forEach(note => {
-          let duration: string = this.noteDuration(note.value.ticks);
-          if (note.value.isRest) {
+        music.rhythm.values.forEach((value, i) => {
+          let duration: string = this.noteDuration(value.ticks);
+          if (value.isRest) {
             duration += 'r';
           }
           // Basic note
           // Let's determine  the headstyle in the case of rhythms only
           let noteKeys: string[];
           if (this.showOnlyRhythm) {
-            noteKeys = note.value.ticks >= Value.HALF.ticks ? ['b/4/x3'] : ['x/'];
+            noteKeys = value.ticks >= Value.HALF.ticks ? ['b/4/x3'] : ['x/'];
           } else {
-            noteKeys = note.chord.map(scaleNote => this.note_height(music.getScale().toPitch(scaleNote).key)
+            noteKeys = music.notes[i].notes.map(scaleNote => this.note_height(music.scale.toPitch(scaleNote).key)
             // change note head if we hide stems
             + (this.showOnlyPitches ? '/d1' : ''));
           }
           // All rests are aligned to b/4
-          if (note.value.isRest) {
+          if (value.isRest) {
             noteKeys = ['b/4'];
           }
           let baseNote = new Vex.Flow.StaveNote({
@@ -203,18 +203,18 @@ export class ScoreViewComponent implements OnInit, OnChanges {
           // TODO: this will have to come with more sematics injected into this component (key, etc.) so
           // we know when to add accidentals and which accidentals to use.
           // TODO: we will need to handle accidents  withi a stave so we add "natural" sign and don't repeat accidents
-          note.chord.forEach((scaleNote, i) => {
-            if (cmajor_scale.includes(music.getScale().toPitch(scaleNote).key % 12)) {
+          music.notes[i].notes.forEach((scaleNote, i) => {
+            if (cmajor_scale.includes(music.scale.toPitch(scaleNote).key % 12)) {
               baseNote.addAccidental(i, new Vex.Flow.Accidental('#'));
             }
           });
           // Add note to current array, unless we showOnlyPitches and this is a rest
-          if (!(this.showOnlyPitches && note.value.isRest)) {
+          if (!(this.showOnlyPitches && value.isRest)) {
             current_notes_per_measure.push(baseNote);
           }
         });
 
-        ticks += music.getSpan();
+        ticks += music.rhythm.span;
       });
 
       // fine tune stave widths

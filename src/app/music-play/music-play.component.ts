@@ -52,7 +52,7 @@ export class MusicPlayComponent implements OnInit, OnChanges {
     if (this.addMetronome) {
       let metronomeStartTime: number = time;
       // Total number of beats
-      const nbTotalTicks: number = this.notes.map(v => v.getSpan()).reduce((s, t) => s + t);
+      const nbTotalTicks: number = this.notes.map(v => v.rhythm.span).reduce((s, t) => s + t);
       const nbTotalBeats: number = nbTotalTicks / Value.WHOLE_TICKS * timeSignatureValue;
       // console.log('nbTotalTicks {}, nbTotalBeats {}', nbTotalTicks, nbTotalBeats);
       let metronomeSynth: Tone.Synth = this.metronomeSynth;
@@ -70,14 +70,14 @@ export class MusicPlayComponent implements OnInit, OnChanges {
     this.notes.forEach((music: Music) => {
       // Determine time duration of a whole note, so we can later precisely quantize values
       // schedule all chords
-      music.getNotes().forEach(note => {
+      music.rhythm.values.forEach((v, i) => {
         // Determine current value
-        let value: number = Tone.Time(note.value.ticks / ticksPerSecond).quantize("64n");
-        if (!note.value.isRest) {
+        let value: number = Tone.Time(v.ticks / ticksPerSecond).quantize("64n");
+        if (!v.isRest) {
           // FIXME: use "note timings", e.g. 16n
           // ... and pitch, unless it's a rest
           let pitches: string[] = [];
-          note.chord.forEach(scaleNote => pitches.push(music.getScale().toPitch(scaleNote).getEnglishString()));
+          music.notes[i].notes.forEach(scaleNote => pitches.push(music.scale.toPitch(scaleNote).getEnglishString()));
           // console.log(pitches.toString() + '/' + value.toString() + ' @' + startTime.toString());
           // Schedule play
           synth.triggerAttackRelease(pitches, value, startTime);

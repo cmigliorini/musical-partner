@@ -5,12 +5,10 @@ import { ScaleNote } from '../scale-notes/scale-note';
  * @member `chord`: array of `ScaleNote`
  * @member `value`: associated `Value`
  */
-export class Note {
-  readonly chord: ScaleNote[];
-  readonly value: Value;
-  constructor(chord: ScaleNote[], value: Value) {
-    this.chord = chord;
-    this.value = value;
+export class Chord {
+  readonly notes: ScaleNote[];
+  constructor(notes: ScaleNote[]) {
+    this.notes = notes;
   }
 
   /**
@@ -18,8 +16,7 @@ export class Note {
    * @param scaleNote
    * @param value
    */
-  static singleNote(scaleNote: ScaleNote, value: Value) {
-    return new Note([scaleNote], value);
+  static singleNoteChord(scaleNote: ScaleNote) {
+    return new Chord([scaleNote]);
   }
-
 }
