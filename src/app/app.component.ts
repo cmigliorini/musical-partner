@@ -1,6 +1,6 @@
 import { Component, OnInit, ElementRef } from '@angular/core';
 import { Music } from './music/music';
-import { Note } from './music/note';
+import { Chord } from './music/note';
 import { Pitch } from './models/pitch';
 import { Value } from './values/value';
 import { Clef } from './scale-notes/clef.enum';
@@ -13,6 +13,7 @@ import { ScaleNoteGeneratorSettings } from './scale-notes/scale-note-generator-s
 import { ValueGeneratorSettings } from './values/value-generator-settings';
 import { TimeSignature } from './values/time-signature';
 import { FormControl } from '@angular/forms';
+import { Rhythm } from './rhythm/rhythm';
 
 @Component({
   selector: 'app-root',
@@ -20,7 +21,7 @@ import { FormControl } from '@angular/forms';
   styleUrls: ['./app.component.sass']
 })
 export class AppComponent {
-  title = 'musical-dictator';
+  title = 'ear-partner';
   notes: Music[];
   lowestNote: Music[];
   highestNote: Music[];
@@ -50,13 +51,13 @@ export class AppComponent {
     // Value Generator Settings
     this.musicSettings.valueSettings = new ValueGeneratorSettings();
     //this.musicSettings.valueSettings.allowedRhythms = [ValueGeneratorSettings.StandardRhythm.Quarter, ValueGeneratorSettings.StandardRhythm.QuarterDottedEight];
-    const rhythms: Value[][] = ValueGeneratorSettings.getStandardRhythmValues().map(r => ValueGeneratorSettings.getStandardRhythm(r)).map(x => ValueGeneratorSettings.getRhythm(x));
+    const rhythms: Rhythm[] = ValueGeneratorSettings.getStandardRhythmValues().map(r => ValueGeneratorSettings.getStandardRhythm(r)).map(x => ValueGeneratorSettings.getRhythm(x));
     this.selectedRhyhtms = Array(rhythms.length).fill(false);
     this.selectedRhyhtms[ValueGeneratorSettings.StandardRhythm.Quarter] = true;
     this.selectedRhyhtms[ValueGeneratorSettings.StandardRhythm.Half] = true;
     this.totalRhythms = rhythms.map(r => {
-      let notes: Note[] = r.map(v => Note.singleNote(new ScaleNote(5, null), v));
-      return [new Music(notes, new Scale(new ScaleNote(0, null), Mode.Major))];
+      let notes: Chord[] = r.values.map(v => Chord.singleNoteChord(new ScaleNote(5, null)));
+      return [new Music(notes, r, new Scale(new ScaleNote(0, null), Mode.Major))];
     })
 
     //this.musicSettings.valueSettings.allowedRhythms = [ValueGeneratorSettings.StandardRhythm.Quarter];
@@ -72,13 +73,12 @@ export class AppComponent {
     this.selectedRhyhtms.forEach((r, i) => { if (r) this.musicSettings.valueSettings.allowedRhythms.push(i) });
     this.notes = this.musicgen.generateNotes(this.musicSettings);
     // Extract first note. This will probably break tuples, but we're not going to display this anyway
-    this.firstNote = this.notes
-      // remove rests
-      .map(music => new Music(music.getNotes().filter(note => !note.value.isRest), music.getScale()))
-      // remove empty sequences
-      .filter(music => music.getNotes().length > 0)
+    this.firstNote = [new Music(this.notes
+      // extract only notes, ignoring rests -- this breaks tuples if any.
+      .map(music => music.notes.filter((n, iNote) => !music.rhythm.values[iNote].isRest))
+      .reduce((prevChord, currChord) => prevChord.concat(currChord), [])
       // Keep only first note
-      .slice(0, 1);
+      .slice(0, 1), new Rhythm([Value.QUARTER]), new Scale(new ScaleNote(0, null),Mode.Major))];
   }
   adjustLowestNote(by: number) {
     if (this.musicSettings.scaleNoteSettings.lowestNote.degree + by > this.musicSettings.scaleNoteSettings.highestNote.degree) {
@@ -108,7 +108,7 @@ export class AppComponent {
     this.musicSettings.valueSettings.nbBeats += 4 * by;
   }
   private makeSingleNoteMusic(scaleNote: ScaleNote): Music[] {
-    return [Music.oneNoteRhythm(Note.singleNote(scaleNote, Value.QUARTER), new Scale(new ScaleNote(0, null), Mode.Major))];
+    return [new Music([Chord.singleNoteChord(scaleNote)], new Rhythm([Value.QUARTER]), new Scale(new ScaleNote(0, null), Mode.Major))];
   }
   scroll(el) {
     el.scrollIntoView();

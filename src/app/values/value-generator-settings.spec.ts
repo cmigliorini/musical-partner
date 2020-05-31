@@ -14,7 +14,12 @@ describe('ValueGeneratorSettings', () => {
       'TwoEights',
       'EightDottedSixteenth',
       'QuarterDottedEight',
-      'FourSixteenth'
+      'FourSixteenth',
+      'EighthTwoSixteenths',
+      'TwoSixteenthsEighth',
+      'Syncopette',
+      'EighthRestEighth',
+      'Triplet'
     ]);
   });
   it('get an enum', ()=> {

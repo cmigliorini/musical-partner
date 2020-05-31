@@ -1,5 +1,7 @@
-import { Note } from './note';
+import { Chord } from './note';
 import { Scale } from './scale';
+import { Rhythm } from '../rhythm/rhythm';
+import { Value } from '../values/value';
 
 /**
  * Expresses a rythm pattern, containing any number of `Note`s over any duration span.
@@ -9,31 +11,17 @@ import { Scale } from './scale';
  * - `span`: duration, consistent with `Note` duration.
  */
 export class Music {
-  private readonly notes: Note[];
-  private scale: Scale;
-  private span: number;
+  // TODO: I guess this should be called MusicFragment
+  public readonly notes: Chord[];
+  public readonly rhythm: Rhythm;
+  public readonly scale: Scale;
 
-  constructor(notes: Note[], scale:Scale) {
+  constructor(notes: Chord[], rhythm: Rhythm, scale: Scale) {
     this.notes = notes;
-    this.span = notes.map(n => n.value.ticks).reduce((a, b) => a + b, 0);
     this.scale = scale;
+    this.rhythm = rhythm;
   };
-  static oneNoteRhythm(note: Note, scale:Scale): Music {
-    return new Music([note], scale);
+  static oneNoteRhythm(chord: Chord, value: Value, scale: Scale): Music {
+    return new Music([chord], new Rhythm([value]), scale);
   };
-
-  public getNotes(): Note[] {
-    return this.notes;
-  }
-
-  public getScale(): Scale {
-    return this.scale;
-  }
-  /**
-   * getSpan
-   * @return total number of ticks for this music
-   */
-  public getSpan(): number {
-    return this.span;
-  }
 }

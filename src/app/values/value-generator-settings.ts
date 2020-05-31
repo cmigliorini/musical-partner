@@ -1,20 +1,22 @@
 import { Value } from './value';
 import { TimeSignature } from './time-signature';
+import { Rhythm } from '../rhythm/rhythm';
 
 export class ValueGeneratorSettings {
-  private static readonly standardRythms: Value[][] = [
-    [Value.QUARTER],
-    [Value.HALF],
-    [Value.HALF_DOTTED],
-    [Value.WHOLE],
-    [Value.EIGHTH, Value.EIGHTH],
-    [Value.EIGHTH_DOTTED, Value.SIXTEENTH],
-    [Value.QUARTER_DOTTED, Value.EIGHTH],
-    [Value.SIXTEENTH, Value.SIXTEENTH, Value.SIXTEENTH, Value.SIXTEENTH],
-    [Value.EIGHTH, Value.SIXTEENTH, Value.SIXTEENTH],
-    [Value.SIXTEENTH, Value.SIXTEENTH, Value.EIGHTH],
-    [Value.SIXTEENTH, Value.EIGHTH, Value.SIXTEENTH],
-    [Value.EIGHTH_REST, Value.EIGHTH],
+  private static readonly standardRythms: Rhythm[] = [
+    new Rhythm([Value.QUARTER]),
+    new Rhythm([Value.HALF]),
+    new Rhythm([Value.HALF_DOTTED]),
+    new Rhythm([Value.WHOLE]),
+    new Rhythm([Value.EIGHTH, Value.EIGHTH]),
+    new Rhythm([Value.EIGHTH_DOTTED, Value.SIXTEENTH]),
+    new Rhythm([Value.QUARTER_DOTTED, Value.EIGHTH]),
+    new Rhythm([Value.SIXTEENTH, Value.SIXTEENTH, Value.SIXTEENTH, Value.SIXTEENTH]),
+    new Rhythm([Value.EIGHTH, Value.SIXTEENTH, Value.SIXTEENTH]),
+    new Rhythm([Value.SIXTEENTH, Value.SIXTEENTH, Value.EIGHTH]),
+    new Rhythm([Value.SIXTEENTH, Value.EIGHTH, Value.SIXTEENTH]),
+    new Rhythm([Value.EIGHTH_REST, Value.EIGHTH]),
+    new Rhythm([Value.EIGHTH, Value.EIGHTH, Value.EIGHTH], Value.QUARTER.ticks),
   ];
 
   // Rythm section
@@ -28,7 +30,7 @@ export class ValueGeneratorSettings {
    * @returns a sequence of `Value`
    *
    */
-  public static getRhythm(rhythm: ValueGeneratorSettings.StandardRhythm): Value[] {
+  public static getRhythm(rhythm: ValueGeneratorSettings.StandardRhythm): Rhythm {
     return ValueGeneratorSettings.standardRythms[rhythm];
   }
 
@@ -47,7 +49,8 @@ export namespace ValueGeneratorSettings {
     EighthTwoSixteenths,
     TwoSixteenthsEighth,
     Syncopette,
-    EighthRestEighth
+    EighthRestEighth,
+    Triplet,
   }
   export function getStandardRhythmValues(): string[] {
     return Object.keys(StandardRhythm).map(key => StandardRhythm[key]).filter(value => typeof value === 'string');
