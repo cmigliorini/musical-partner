@@ -21,7 +21,7 @@ import { Rhythm } from './rhythm/rhythm';
   styleUrls: ['./app.component.sass']
 })
 export class AppComponent {
-  title = 'musical-dictator';
+  title = 'ear-partner';
   notes: Music[];
   lowestNote: Music[];
   highestNote: Music[];
