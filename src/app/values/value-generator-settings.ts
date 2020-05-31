@@ -16,7 +16,7 @@ export class ValueGeneratorSettings {
     new Rhythm([Value.SIXTEENTH, Value.SIXTEENTH, Value.EIGHTH]),
     new Rhythm([Value.SIXTEENTH, Value.EIGHTH, Value.SIXTEENTH]),
     new Rhythm([Value.EIGHTH_REST, Value.EIGHTH]),
-    //new Rhythm([Value.EIGHTH, Value.EIGHTH, Value.EIGHTH], Value.QUARTER.ticks),
+    new Rhythm([Value.EIGHTH, Value.EIGHTH, Value.EIGHTH], Value.QUARTER.ticks),
   ];
 
   // Rythm section
@@ -50,7 +50,7 @@ export namespace ValueGeneratorSettings {
     TwoSixteenthsEighth,
     Syncopette,
     EighthRestEighth,
-    //Triolet
+    Triplet,
   }
   export function getStandardRhythmValues(): string[] {
     return Object.keys(StandardRhythm).map(key => StandardRhythm[key]).filter(value => typeof value === 'string');

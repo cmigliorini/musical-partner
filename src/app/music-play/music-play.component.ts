@@ -68,14 +68,15 @@ export class MusicPlayComponent implements OnInit, OnChanges {
     let startTime: number = time;
     let synth: Tone.PolySynth = this.synth;
     this.notes.forEach((music: Music) => {
-      // Determine time duration of a whole note, so we can later precisely quantize values
+      // Manage tuplets
+      let tickFactor = music.rhythm.isTuplet ?
+        music.rhythm.span / music.rhythm.values.map(v => v.ticks).reduce((p, c) => p + c, 0)
+        : 1.0;
       // schedule all chords
       music.rhythm.values.forEach((v, i) => {
         // Determine current value
-        let value: number = Tone.Time(v.ticks / ticksPerSecond).quantize("64n");
+        let value: number = Tone.Time(tickFactor * v.ticks / ticksPerSecond).toSeconds();
         if (!v.isRest) {
-          // FIXME: use "note timings", e.g. 16n
-          // ... and pitch, unless it's a rest
           let pitches: string[] = [];
           music.notes[i].notes.forEach(scaleNote => pitches.push(music.scale.toPitch(scaleNote).getEnglishString()));
           // console.log(pitches.toString() + '/' + value.toString() + ' @' + startTime.toString());

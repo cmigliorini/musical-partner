@@ -30,7 +30,8 @@ export class ScoreViewComponent implements OnInit, OnChanges {
   // One stave per measure
   staves: Vex.Flow.Stave[];
   // one array of notes per stave
-  notes_per_measure: Vex.Flow.StaveNote[][];
+  private notes_per_measure: Vex.Flow.StaveNote[][];
+  private tupletsPerMeasure: Vex.Flow.Tuplet[][];
 
   // TODO: try to make this dynamic, based on stave content
   DEFAULT_STAVE_WIDTH: number = 300;
@@ -40,7 +41,7 @@ export class ScoreViewComponent implements OnInit, OnChanges {
   private rendererWidth: number;
   private rendererHeight: number;
 
-  // This will convert a single note tuple into a string representing a single note
+  // This will convert a single note tuplet into a string representing a single note
   private note_height(key: number): string {
     return this.note_names[key % 12].concat('/', Math.floor(key / 12 - 1).toString());
   }
@@ -132,6 +133,9 @@ export class ScoreViewComponent implements OnInit, OnChanges {
       this.notes_per_measure = [];
       this.notes_per_measure.push(new Array<Vex.Flow.StaveNote>());
       let current_notes_per_measure = this.notes_per_measure[0];
+      this.tupletsPerMeasure = [];
+      this.tupletsPerMeasure.push(new Array<Vex.Flow.Tuplet>());
+      let currentTupletsPerMeasure = this.tupletsPerMeasure[0];
 
       // We'll construct an array of Note arrays, an array of Stave, and an array of Beams for later rendering
       this.notes.forEach(music => {
@@ -143,6 +147,9 @@ export class ScoreViewComponent implements OnInit, OnChanges {
           // New array of Notes
           current_notes_per_measure = new Array<Vex.Flow.StaveNote>();
           this.notes_per_measure.push(current_notes_per_measure);
+          // New array of Tuples
+          currentTupletsPerMeasure = new Array<Vex.Flow.Tuplet>();
+          this.tupletsPerMeasure.push(currentTupletsPerMeasure);
           // reset ticks counter
           ticks = 0;
         }
@@ -153,13 +160,8 @@ export class ScoreViewComponent implements OnInit, OnChanges {
         // We're good, let's add the rhythm's notes to current stave
         // rythm->notes->key[] translated to strings + duration -> stavenote
 
-        // We don't do tuplets for now
-        // TODO: accept tuplets.
-        if (music.rhythm.span != music.rhythm.values.map(n => n.ticks).reduce((a, b) => a + b, 0)) {
-          throw 'sorry, we don\'t do tuplets for now';
-        }
-
-        // start light, we don't accept tuplets (in Vex.Flow understanding) so we just flow our notes
+        // We will flow our StaveNotes to an array that will be used later to create tuples if necessary
+        let currentMusicNotes: Vex.Flow.StaveNote[] = [];
         music.rhythm.values.forEach((value, i) => {
           let duration: string = this.noteDuration(value.ticks);
           if (value.isRest) {
@@ -172,8 +174,8 @@ export class ScoreViewComponent implements OnInit, OnChanges {
             noteKeys = value.ticks >= Value.HALF.ticks ? ['b/4/x3'] : ['x/'];
           } else {
             noteKeys = music.notes[i].notes.map(scaleNote => this.note_height(music.scale.toPitch(scaleNote).key)
-            // change note head if we hide stems
-            + (this.showOnlyPitches ? '/d1' : ''));
+              // change note head if we hide stems
+              + (this.showOnlyPitches ? '/d1' : ''));
           }
           // All rests are aligned to b/4
           if (value.isRest) {
@@ -210,9 +212,22 @@ export class ScoreViewComponent implements OnInit, OnChanges {
           });
           // Add note to current array, unless we showOnlyPitches and this is a rest
           if (!(this.showOnlyPitches && value.isRest)) {
-            current_notes_per_measure.push(baseNote);
+            currentMusicNotes.push(baseNote);
           }
         });
+
+        // Add notes to stave
+        currentMusicNotes.forEach(n => current_notes_per_measure.push(n));
+
+        // Handle Tuplets
+        if (music.rhythm.isTuplet) {
+          // Compute "factor"
+          let smallest = music.rhythm.values.map(v => v.ticks).reduce((p, c) => Math.min(p, c), Value.WHOLE_TICKS);
+          let nbNotes = music.rhythm.values.map(v => v.ticks).reduce((p, c) => p + c, 0) / smallest;
+          let occupy = music.rhythm.span / smallest;
+          
+          currentTupletsPerMeasure.push(new Vex.Flow.Tuplet(currentMusicNotes, {ratioed: false, num_notes: nbNotes, notes_occupied:occupy}));
+        }
 
         ticks += music.rhythm.span;
       });
@@ -287,6 +302,7 @@ export class ScoreViewComponent implements OnInit, OnChanges {
     this.staves.forEach((stave, i) => {
       stave.setContext(ctx).draw();
       Vex.Flow.Formatter.FormatAndDraw(ctx, stave, this.notes_per_measure[i], { auto_beam: !this.showOnlyPitches, align_rests: false });
+      this.tupletsPerMeasure[i].forEach(tuplet => tuplet.setContext(ctx).draw());
     });
     // Compute total dimensions
     // TODO: find out why we need this bloody 10
