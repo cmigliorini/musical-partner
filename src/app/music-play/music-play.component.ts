@@ -14,11 +14,10 @@ export class MusicPlayComponent implements OnInit, OnChanges {
   @Input() notes: Music[];
   @Input() addMetronome?: boolean;
   @Input() beatValue: Value;
+  @Input() tempo: number
 
   private synth: Tone.PolySynth;
   private metronomeSynth: Tone.Synth;
-
-  private tempo: number = 50;
 
   constructor() {
     // This will pretty much create a "clave" sound
@@ -97,13 +96,16 @@ export class MusicPlayComponent implements OnInit, OnChanges {
     if (this.notes == null) {
       return;
     }
+    if (Tone.Transport.state === "started") {
+      this.onStop();
+    }
+
     if (this.synth == null) {
       this.synth = new Tone.PolySynth({ maxPolyphony: 5, voice: Tone.Synth }).toDestination();
       this.synth.set({envelope:{release:0.01}});
     }
     if (this.metronomeSynth == null) {
       this.metronomeSynth = new Tone.Synth().toDestination();
-      this.metronomeSynth.set({volume:1});
     }
 
     if (Tone.Transport.state !== "stopped") {

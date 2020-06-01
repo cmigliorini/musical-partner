@@ -39,6 +39,11 @@ export class AppComponent implements OnInit {
   nbBeats: number;
   musicPlayBeatValue: Value;
 
+  // Playback options
+  bpm: number;
+  readonly minBpm: number = 30;
+  readonly maxBpm: number = 60;
+
   constructor(private musicgen: MusicGeneratorService) {
 
   }
@@ -54,15 +59,21 @@ export class AppComponent implements OnInit {
     // Value Generator Settings
     this.musicSettings.valueSettings = new ValueGeneratorSettings;
     // Initialize rhythmic mode to Binary
-    this.rhythmicMode = ValueGeneratorSettings.RhythmicMode.Binary;
-    this.setRhythmicMode(this.rhythmicMode);
+    this.setRhythmicMode(ValueGeneratorSettings.RhythmicMode.Binary);
 
     // update display variables for ScaleNote Generator settings
     this.intervals = Array.from(Array(this.musicSettings.scaleNoteSettings.maxInterval).keys()).reverse().map(i => this.intervalNames[i + 1]);
     this.lowestNote = this.makeSingleNoteMusic(this.musicSettings.scaleNoteSettings.lowestNote);
     this.highestNote = this.makeSingleNoteMusic(this.musicSettings.scaleNoteSettings.highestNote);
+
+    // Playback
+    this.bpm = 50;
   }
+
   setRhythmicMode(mode: number) {
+    if (this.rhythmicMode == mode) {
+      return;
+    }
     this.rhythmicMode = mode;
     const rhythms: Rhythm[] = ValueGeneratorSettings.getStandardRhythms(mode);
     this.totalRhythms = rhythms.map(r => {
@@ -75,11 +86,13 @@ export class AppComponent implements OnInit {
       this.musicSettings.valueSettings.timeSignature = new TimeSignature(6, Value.EIGHTH);
       this.nbBeats = 4;
       this.musicPlayBeatValue = Value.QUARTER_DOTTED;
+      this.bpm = 40;
     }
     else if (this.rhythmicMode == ValueGeneratorSettings.RhythmicMode.Binary){
       this.musicSettings.valueSettings.timeSignature = new TimeSignature(4, Value.QUARTER);
       this.nbBeats = 12;
       this.musicPlayBeatValue = Value.QUARTER;
+      this.bpm = 50;
     }
     else {
       throw "I don't handle rhytmic mode " + mode;
@@ -144,6 +157,12 @@ export class AppComponent implements OnInit {
   }
   toggleShowSolution() {
     this.showSolution = !this.showSolution;
+  }
+  adjustTempo(by:number){
+    if (this.bpm + 2 * by < this.minBpm || this.bpm + 2 * by > this.maxBpm) {
+      return;
+    }
+    this.bpm += 2 * by;
   }
 
 }

@@ -6,6 +6,7 @@ import { Binary } from '@angular/compiler';
 export class ValueGeneratorSettings {
   private static readonly standardRhythms: Rhythm[][] = [[
     new Rhythm([Value.QUARTER]),
+    new Rhythm([Value.QUARTER_REST]),
     new Rhythm([Value.HALF]),
     new Rhythm([Value.HALF_DOTTED]),
     new Rhythm([Value.WHOLE]),

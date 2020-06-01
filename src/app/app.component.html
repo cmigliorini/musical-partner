@@ -104,15 +104,20 @@
     </div>
   </div>
   <!-- Rhythmic mode selection -->
-  <div class="custom-control custom-radio">
-    <input type="radio" class="custom-control-input" id="defaultChecked" name="defaultExampleRadios" checked
-      (change)="setRhythmicMode(ValueGeneratorSettings.RhythmicMode.Binary)">
-    <label class="custom-control-label" for="defaultChecked">Binaire</label>
-  </div>
-  <div class="custom-control custom-radio">
-    <input type="radio" class="custom-control-input" id="defaultUnchecked" name="defaultExampleRadios"
-      (change)="setRhythmicMode(ValueGeneratorSettings.RhythmicMode.Ternary)">
-    <label class="custom-control-label" for="defaultUnchecked">Ternaire</label>
+
+  <div class="row mt-2 pt-2">
+    <div class="col-sm-2">
+      <button class="btn btn-block btn-info" (click)="setRhythmicMode(ValueGeneratorSettings.RhythmicMode.Binary)">
+        Binaire
+      </button>
+    </div>
+
+    <div class="col-sm-2">
+      <button class="btn btn-block btn-info" (click)="setRhythmicMode(ValueGeneratorSettings.RhythmicMode.Ternary)">
+        Ternaire
+      </button>
+    </div>
+
   </div>
 
   <div class="row align-items-center">
@@ -153,122 +158,155 @@
   </div>
   <div class="row align-items-center">
     <div class="col-sm-1">
-      <div class="row align-items-center">
+      <div class="badge badge-light text-centered"><span>pulsations</span></div>
+    </div>
+    <div class="col-sm-1">
+      <div class="row align-items-center mt-1">
         <button class="btn btn-info  btn-block" (click)="adjustNbBeats(+1)">↑</button>
       </div>
-      <div class="row align-items-center">
-        <div class="col-sm">
-          <div class="badge badge-light text-centered"><span>pulsations</span></div>
-        </div>
+      <div class="row align-items-center mt-1">
+        <span class="btn btn-light btn-block">{{nbBeats}}
+        </span>
       </div>
-      <div class="row align-items-center">
+      <div class="row align-items-center mt-1">
         <button class="btn btn-warning btn-block" (click)="adjustNbBeats(-1)">↓</button>
       </div>
     </div>
     <div class="col-sm-1" style="height:100%;">
-      <span class="btn btn-secondary btn-block">{{nbBeats}}
-      </span>
     </div>
 
     <div class=col-sm-2 style="height:100%;">
-      <button class="btn btn-info btn-block" (click)="generateNotes('Melodic');scroll(solution);">
-        Dictée Mélodique
-      </button>
-    </div>
-    <div class=col-sm-2 style="height:100%;">
-      <button class="btn btn-info btn-block" (click)="generateNotes('Rhythmic');scroll(solution);">
-        Dictée Rythmique
-      </button>
-    </div>
-    <div class=col-sm-2 style="height:100%;">
-      <button class="btn btn-info btn-block" (click)="generateNotes('Global');scroll(solution);">
-        Dictée Globale
-      </button>
-    </div>
-  </div>
-</div>
-<div class="container" [class]="notes ? 'visible' : 'invisible'">
-  <div class="row align-items-center mt-2 pt-2 app-heading">
-    <div class="col-sm">
-      <h2>Indices</h2>
-    </div>
-  </div>
-  <div class="row align-items-center mt-2 pt-2"
-    [style]="(dictationMode != DictationMode.Rhythmic ? '' : 'display:none;')">
-    <div class="col-sm-2">
-      <p>Voici la première note que tu vas entendre</p>
-    </div>
-    <div class="col-sm-2">
-      <app-score-view [notes]="notes ? firstNote : undefined" [isVisible]="true" [displayClef]="true"
-        [displayTimeSignature]="false" [showOnlyPitches]="true"></app-score-view>
-    </div>
-  </div>
-  <div class="row align-items-center"
-    [style]="(dictationMode == DictationMode.Melodic ? 'display:block;' : 'display:none;')">
-    <div class="col-sm">
-      Et voici les rythmes
-    </div>
-  </div>
-  <div class="row align-items-center"
-    [style]="(dictationMode == DictationMode.Rhythmic ? 'display:block;' : 'display:none;')">
-    <div class="col-sm">
-      Voici les hauteurs des notes que tu vas entendre
-    </div>
-  </div>
-  <div class="row align-items-center"
-    [style]="(dictationMode != DictationMode.Global ? 'display:block;' : 'display:none;')">
-    <div class="col-sm">
-      <app-score-view #clues [showOnlyPitches]="dictationMode==DictationMode.Rhythmic"
-        [notes]="notes ? notes : undefined" [displayClef]="true"
-        [timeSignature]="musicSettings.valueSettings.timeSignature" [displayTimeSignature]="true"
-        [showOnlyRhythm]="dictationMode==DictationMode.Melodic" [isVisible]="dictationMode != DictationMode.Global">
-      </app-score-view>
-    </div>
-  </div>
-  <div class="row align-items-center mt-2 pt-2  app-heading" [class]="notes ? 'visible' : 'invisible'">
-    <div class="col-sm">
-      <h2>À toi de jouer</h2>
-    </div>
-  </div>
-  <div class="row mt-2 pt-2">
-    <div class="col-sm-6">
-      <p>Maintenant, tu peux écouter la dictée autant de fois que tu le souhaites...<br>... puis afficher la solution.
-      </p>
-    </div>
-    <div class="col-sm-2">
-      <div class="row align-items-center">
-        <app-music-play class="container" [notes]="notes" [addMetronome]="dictationMode!=DictationMode.Melodic" [beatValue]="musicPlayBeatValue">
-        </app-music-play>
+      <div class="row mt-1">
+        <button class="btn btn-info btn-block" (click)="generateNotes('Melodic');scroll(solution);">
+          Dictée Mélodique
+        </button>
       </div>
-      <div class="row align-items-center">
-        <button class="btn btn-block btn-success text-capitalize" [disabled]="notes==null"
+      <div class="row mt-1">
+        <button class="btn btn-info btn-block" (click)="generateNotes('Rhythmic');scroll(solution);">
+          Dictée Rythmique
+        </button>
+      </div>
+      <div class="row mt-1">
+        <button class="btn btn-info btn-block" (click)="generateNotes('Global');scroll(solution);">
+          Dictée Globale
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="container" [class]="notes ? 'visible' : 'invisible'">
+    <div class="row align-items-center mt-2 pt-2 app-heading">
+      <div class="col-sm">
+        <h2>Indices</h2>
+      </div>
+    </div>
+    <div class="row align-items-center mt-2 pt-2"
+      [style]="(dictationMode != DictationMode.Rhythmic ? '' : 'display:none;')">
+      <div class="col-sm-2">
+        <p>Voici la première note que tu vas entendre</p>
+      </div>
+      <div class="col-sm-2">
+        <app-score-view [notes]="notes ? firstNote : undefined" [isVisible]="true" [displayClef]="true"
+          [displayTimeSignature]="false" [showOnlyPitches]="true"></app-score-view>
+      </div>
+    </div>
+    <div class="row align-items-center"
+      [style]="(dictationMode == DictationMode.Melodic ? 'display:block;' : 'display:none;')">
+      <div class="col-sm">
+        Et voici les rythmes
+      </div>
+    </div>
+    <div class="row align-items-center"
+      [style]="(dictationMode == DictationMode.Rhythmic ? 'display:block;' : 'display:none;')">
+      <div class="col-sm">
+        Voici les hauteurs des notes que tu vas entendre
+      </div>
+    </div>
+    <div class="row align-items-center"
+      [style]="(dictationMode != DictationMode.Global ? 'display:block;' : 'display:none;')">
+      <div class="col-sm">
+        <app-score-view #clues [showOnlyPitches]="dictationMode==DictationMode.Rhythmic"
+          [notes]="notes ? notes : undefined" [displayClef]="true"
+          [timeSignature]="musicSettings.valueSettings.timeSignature" [displayTimeSignature]="true"
+          [showOnlyRhythm]="dictationMode==DictationMode.Melodic" [isVisible]="dictationMode != DictationMode.Global">
+        </app-score-view>
+      </div>
+    </div>
+    <div class="row align-items-center mt-2 pt-2  app-heading" [class]="notes ? 'visible' : 'invisible'">
+      <div class="col-sm">
+        <h2>À toi de jouer</h2>
+      </div>
+    </div>
+    <div class="row mt-2 pt-2 align-items-center">
+      <div class="col-sm-6">
+        <p>Maintenant, tu peux écouter la dictée autant de fois que tu le souhaites...
+        </p>
+      </div>
+    </div>
+    <div class="row align-items-center">
+      <div class="col-sm-1">
+        <img src="assets/metronome.svg" alt="metronome" style="max-width: 100%; max-height: 50px;">
+      </div>
+      <div class="col-sm-1">
+        <div class="row align-items-center mt-1">
+          <button class="btn btn-info  btn-block" (click)="adjustTempo(+1)">↑</button>
+        </div>
+        <div class="row align-items-center mt-1" style="height:100%;">
+          <span class="btn btn-light btn-block">{{bpm}}
+          </span>
+        </div>
+        <div class="row align-items-center mt-1">
+          <button class="btn btn-warning btn-block" (click)="adjustTempo(-1)">↓</button>
+        </div>
+      </div>
+      <div class="col-sm-1">
+        <img src="assets/ear.svg" alt="metronome" style="max-width: 100%; max-height: 50px;">
+      </div>
+
+      <div class="col-sm-2">
+        <div class="row align-items-center">
+          <app-music-play class="container" [tempo]="bpm" [notes]="notes"
+            [addMetronome]="dictationMode!=DictationMode.Melodic" [beatValue]="musicPlayBeatValue">
+          </app-music-play>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-2 pt-2 align-items-center">
+      <div class="col-sm-6">
+        <p>... puis découvrir la solution
+        </p>
+      </div>
+    </div>
+    <div class="row align-items-center">
+      <div class="col-sm-6">
+        <button [disabled]="notes==null"
+          [ngClass]="'btn btn-block text-capitalize ' + (showSolution ? 'btn-warning' : 'btn-info')"
           (click)="toggleShowSolution()">
           {{ showSolution ? 'Cache la Solution' : 'Affiche la Solution' }}
         </button>
       </div>
     </div>
-  </div>
-  <div #solution class="row align-items-center ">
-    <div class="col-sm">
-      <app-score-view [notes]="notes" [timeSignature]="musicSettings.valueSettings.timeSignature" [displayClef]="true"
-        [displayTimeSignature]="true" [isVisible]="showSolution">
-      </app-score-view>
-    </div>
-  </div>
-</div>
-<div class="container">
-  <div class="row">
-    <div class="col-sm">
-      <p>Quand tu auras fini, retourne en haut de la page pour recommencer, après avoir éventuellement changé les
-        paramètres.</p>
-    </div>
-  </div>
-</div>
 
-<div class="container">
-  <p><small class="text-muted"><em>&copy; Christophe Migliorini 2020. Ce site a pu voir le jour grâce aux
-        (ou à cause des) circonstances exceptionnelles du confinement général de la population française décrété en
-        mars 2020, sur une idée et avec l'aide précieuse de Cécile Coqu, musicienne et professeur de formation
-        musicale. View code on <a href="https://github.com/cmigliorini/musical-partner/" target="_blank"
-          rel="noopener noreferrer">GitHub</a></em></small></p>
-</div>
+    <div #solution class="row align-items-center ">
+      <div class="col-sm">
+        <app-score-view [notes]="notes" [timeSignature]="musicSettings.valueSettings.timeSignature" [displayClef]="true"
+          [displayTimeSignature]="true" [isVisible]="showSolution">
+        </app-score-view>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm">
+        <p>Quand tu auras fini, retourne en haut de la page pour recommencer, après avoir éventuellement changé les
+          paramètres.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <p><small class="text-muted"><em>&copy; Christophe Migliorini 2020. Ce site a pu voir le jour grâce aux
+          (ou à cause des) circonstances exceptionnelles du confinement général de la population française décrété en
+          mars 2020, sur une idée et avec l'aide précieuse de Cécile Coqu, musicienne et professeur de formation
+          musicale. View code on <a href="https://github.com/cmigliorini/musical-partner/" target="_blank"
+            rel="noopener noreferrer">GitHub</a></em></small></p>
+  </div>
