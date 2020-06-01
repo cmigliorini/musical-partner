@@ -2,6 +2,7 @@ import { Component, OnInit, Input, OnChanges } from '@angular/core';
 import { Music } from '../music/music';
 import { Value } from '../values/value';
 import * as Tone from "tone";
+import { Envelope } from 'tone';
 
 @Component({
   selector: 'app-music-play',
@@ -12,11 +13,11 @@ import * as Tone from "tone";
 export class MusicPlayComponent implements OnInit, OnChanges {
   @Input() notes: Music[];
   @Input() addMetronome?: boolean;
+  @Input() beatValue: Value;
+  @Input() tempo: number
 
   private synth: Tone.PolySynth;
   private metronomeSynth: Tone.Synth;
-
-  private tempo: number = 50;
 
   constructor() {
     // This will pretty much create a "clave" sound
@@ -30,6 +31,9 @@ export class MusicPlayComponent implements OnInit, OnChanges {
     this.metronomeSynth.envelope.release = 0.01;
     this.metronomeSynth.envelope.releaseCurve = "exponential";
     this.metronomeSynth.oscillator.type = "sine";
+
+    //this.synth = new Tone.PolySynth().toDestination();
+    //this.synth.set({envelope: { release:0.01}});
   }
 
   ngOnInit(): void {
@@ -43,21 +47,20 @@ export class MusicPlayComponent implements OnInit, OnChanges {
 
   play(time: number) {
     // TODO: @Input() this
-    let timeSignatureValue = 4;// quarter note per beat
     let bps = Tone.Transport.bpm.value / 60;
-    let ticksPerSecond = Value.WHOLE_TICKS / timeSignatureValue * bps;
+    let ticksPerSecond = this.beatValue.ticks * bps;
 
     console.debug('starting play at ' + time);
     // if we need to add a metronome, we'll  generate a loop
     if (this.addMetronome) {
-      let metronomeStartTime: number = time;
+      let metronomeStartTime: number = time + 0.5;
       // Total number of beats
       const nbTotalTicks: number = this.notes.map(v => v.rhythm.span).reduce((s, t) => s + t);
-      const nbTotalBeats: number = nbTotalTicks / Value.WHOLE_TICKS * timeSignatureValue;
+      const nbTotalBeats: number = nbTotalTicks / this.beatValue.ticks;
       // console.log('nbTotalTicks {}, nbTotalBeats {}', nbTotalTicks, nbTotalBeats);
       let metronomeSynth: Tone.Synth = this.metronomeSynth;
       
-      const beatTime: number = Tone.Time(Value.QUARTER.ticks / ticksPerSecond).quantize("64n");
+      const beatTime: number = Tone.Time(this.beatValue.ticks / ticksPerSecond).toSeconds();
       Array(nbTotalBeats).fill(1).forEach(i => {
         metronomeSynth.triggerAttackRelease('c6', '32n', metronomeStartTime);
         // console.log('c6/32n @' + metronomeStartTime.toString());
@@ -65,7 +68,7 @@ export class MusicPlayComponent implements OnInit, OnChanges {
       });
     }
 
-    let startTime: number = time;
+    let startTime: number = time + 0.5;
     let synth: Tone.PolySynth = this.synth;
     this.notes.forEach((music: Music) => {
       // Manage tuplets
@@ -93,8 +96,13 @@ export class MusicPlayComponent implements OnInit, OnChanges {
     if (this.notes == null) {
       return;
     }
+    if (Tone.Transport.state === "started") {
+      this.onStop();
+    }
+
     if (this.synth == null) {
       this.synth = new Tone.PolySynth({ maxPolyphony: 5, voice: Tone.Synth }).toDestination();
+      this.synth.set({envelope:{release:0.01}});
     }
     if (this.metronomeSynth == null) {
       this.metronomeSynth = new Tone.Synth().toDestination();

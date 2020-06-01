@@ -1,9 +1,7 @@
-import { Component, OnInit, ElementRef } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { Music } from './music/music';
 import { Chord } from './music/note';
-import { Pitch } from './models/pitch';
 import { Value } from './values/value';
-import { Clef } from './scale-notes/clef.enum';
 import { ScaleNote } from './scale-notes/scale-note';
 import { Mode } from './scale-notes/mode.enum';
 import { Scale } from './music/scale';
@@ -20,7 +18,7 @@ import { Rhythm } from './rhythm/rhythm';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.sass']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'ear-partner';
   notes: Music[];
   lowestNote: Music[];
@@ -29,48 +27,85 @@ export class AppComponent {
   intervalNames: string[] = ['', 'seconde', 'tierce', 'quarte', 'quinte', 'sixte'];
   intervals: string[];
   totalRhythms: Music[][];
-  selectedRhyhtms: boolean[];
+  selectedRhythms: boolean[];
   // Dirty trick to  export enum to template :/
   DictationMode = DictationMode;
   dictationMode: DictationMode;
   showSolution: boolean = false;
   firstNote: Music[];
+  // TODO: bind this to UX switch
+  ValueGeneratorSettings = ValueGeneratorSettings;
+  rhythmicMode: ValueGeneratorSettings.RhythmicMode;
+  nbBeats: number;
+  musicPlayBeatValue: Value;
+
+  // Playback options
+  bpm: number;
+  readonly minBpm: number = 30;
+  readonly maxBpm: number = 60;
 
   constructor(private musicgen: MusicGeneratorService) {
+
+  }
+  ngOnInit() {
     this.musicSettings = new MusicGeneratorSettings;
     // ScaleNote Generator settings
     this.musicSettings.scale = new Scale(new ScaleNote(0, null), Mode.Major);
     this.musicSettings.scaleNoteSettings = new ScaleNoteGeneratorSettings();
     this.musicSettings.scaleNoteSettings.lowestNote = new ScaleNote(7 * 5, null);
-    this.lowestNote = this.makeSingleNoteMusic(this.musicSettings.scaleNoteSettings.lowestNote);
     this.musicSettings.scaleNoteSettings.highestNote = new ScaleNote(7 * 5 + 4, null);
-    this.highestNote = this.makeSingleNoteMusic(this.musicSettings.scaleNoteSettings.highestNote);
     this.musicSettings.scaleNoteSettings.maxInterval = 2;
-    this.intervals = Array.from(Array(this.musicSettings.scaleNoteSettings.maxInterval).keys()).reverse().map(i => this.intervalNames[i + 1]);
     this.musicSettings.scaleNoteSettings.nbAccidentals = 0;
     // Value Generator Settings
-    this.musicSettings.valueSettings = new ValueGeneratorSettings();
-    //this.musicSettings.valueSettings.allowedRhythms = [ValueGeneratorSettings.StandardRhythm.Quarter, ValueGeneratorSettings.StandardRhythm.QuarterDottedEight];
-    const rhythms: Rhythm[] = ValueGeneratorSettings.getStandardRhythmValues().map(r => ValueGeneratorSettings.getStandardRhythm(r)).map(x => ValueGeneratorSettings.getRhythm(x));
-    this.selectedRhyhtms = Array(rhythms.length).fill(false);
-    this.selectedRhyhtms[ValueGeneratorSettings.StandardRhythm.Quarter] = true;
-    this.selectedRhyhtms[ValueGeneratorSettings.StandardRhythm.Half] = true;
+    this.musicSettings.valueSettings = new ValueGeneratorSettings;
+    // Initialize rhythmic mode to Binary
+    this.setRhythmicMode(ValueGeneratorSettings.RhythmicMode.Binary);
+
+    // update display variables for ScaleNote Generator settings
+    this.intervals = Array.from(Array(this.musicSettings.scaleNoteSettings.maxInterval).keys()).reverse().map(i => this.intervalNames[i + 1]);
+    this.lowestNote = this.makeSingleNoteMusic(this.musicSettings.scaleNoteSettings.lowestNote);
+    this.highestNote = this.makeSingleNoteMusic(this.musicSettings.scaleNoteSettings.highestNote);
+
+    // Playback
+    this.bpm = 50;
+  }
+
+  setRhythmicMode(mode: number) {
+    if (this.rhythmicMode == mode) {
+      return;
+    }
+    this.rhythmicMode = mode;
+    const rhythms: Rhythm[] = ValueGeneratorSettings.getStandardRhythms(mode);
     this.totalRhythms = rhythms.map(r => {
       let notes: Chord[] = r.values.map(v => Chord.singleNoteChord(new ScaleNote(5, null)));
       return [new Music(notes, r, new Scale(new ScaleNote(0, null), Mode.Major))];
-    })
-
-    //this.musicSettings.valueSettings.allowedRhythms = [ValueGeneratorSettings.StandardRhythm.Quarter];
-    this.musicSettings.valueSettings.nbBeats = 12;
-    this.musicSettings.valueSettings.timeSignature = new TimeSignature(4, Value.QUARTER);
-  }
-  ngOnInit() {
+    });
+    this.selectedRhythms = Array(rhythms.length).fill(false);
+    this.selectedRhythms[0] = true;
+    if (this.rhythmicMode == ValueGeneratorSettings.RhythmicMode.Ternary) {
+      this.musicSettings.valueSettings.timeSignature = new TimeSignature(6, Value.EIGHTH);
+      this.nbBeats = 4;
+      this.musicPlayBeatValue = Value.QUARTER_DOTTED;
+      this.bpm = 40;
+    }
+    else if (this.rhythmicMode == ValueGeneratorSettings.RhythmicMode.Binary){
+      this.musicSettings.valueSettings.timeSignature = new TimeSignature(4, Value.QUARTER);
+      this.nbBeats = 12;
+      this.musicPlayBeatValue = Value.QUARTER;
+      this.bpm = 50;
+    }
+    else {
+      throw "I don't handle rhytmic mode " + mode;
+    }
+    this.notes = undefined;
+    this.firstNote = undefined;
   }
   generateNotes(mode: string) {
     this.updateShowClues(DictationMode[mode]);
     this.showSolution = false;
     this.musicSettings.valueSettings.allowedRhythms = [];
-    this.selectedRhyhtms.forEach((r, i) => { if (r) this.musicSettings.valueSettings.allowedRhythms.push(i) });
+    this.selectedRhythms.forEach((r, i) => { if (r) this.musicSettings.valueSettings.allowedRhythms.push(ValueGeneratorSettings.getRhythm(this.rhythmicMode, i)) });
+    this.musicSettings.valueSettings.nbBeats = this.nbBeats * (this.rhythmicMode == 1 ? 3 : 1);
     this.notes = this.musicgen.generateNotes(this.musicSettings);
     // Extract first note. This will probably break tuples, but we're not going to display this anyway
     this.firstNote = [new Music(this.notes
@@ -78,7 +113,7 @@ export class AppComponent {
       .map(music => music.notes.filter((n, iNote) => !music.rhythm.values[iNote].isRest))
       .reduce((prevChord, currChord) => prevChord.concat(currChord), [])
       // Keep only first note
-      .slice(0, 1), new Rhythm([Value.QUARTER]), new Scale(new ScaleNote(0, null),Mode.Major))];
+      .slice(0, 1), new Rhythm([Value.QUARTER]), new Scale(new ScaleNote(0, null), Mode.Major))];
   }
   adjustLowestNote(by: number) {
     if (this.musicSettings.scaleNoteSettings.lowestNote.degree + by > this.musicSettings.scaleNoteSettings.highestNote.degree) {
@@ -102,10 +137,13 @@ export class AppComponent {
     this.intervals = Array.from(Array(this.musicSettings.scaleNoteSettings.maxInterval).keys()).reverse().map(i => this.intervalNames[i + 1]);
   }
   adjustNbBeats(by: number) {
-    if (this.musicSettings.valueSettings.nbBeats + 4 * by <= 0 || this.musicSettings.valueSettings.nbBeats + 4 * by > 16) {
+    const beatsIncrement = this.rhythmicMode == ValueGeneratorSettings.RhythmicMode.Binary ? 4 : 2;
+    const maxBeats = this.rhythmicMode == ValueGeneratorSettings.RhythmicMode.Binary ? 16 : 8;
+    const minBeats = this.rhythmicMode == ValueGeneratorSettings.RhythmicMode.Binary ? 4 : 2;
+    if (this.nbBeats + beatsIncrement * by < minBeats || this.nbBeats + beatsIncrement * by > maxBeats) {
       return;
     }
-    this.musicSettings.valueSettings.nbBeats += 4 * by;
+    this.nbBeats += beatsIncrement * by;
   }
   private makeSingleNoteMusic(scaleNote: ScaleNote): Music[] {
     return [new Music([Chord.singleNoteChord(scaleNote)], new Rhythm([Value.QUARTER]), new Scale(new ScaleNote(0, null), Mode.Major))];
@@ -119,6 +157,12 @@ export class AppComponent {
   }
   toggleShowSolution() {
     this.showSolution = !this.showSolution;
+  }
+  adjustTempo(by:number){
+    if (this.bpm + 2 * by < this.minBpm || this.bpm + 2 * by > this.maxBpm) {
+      return;
+    }
+    this.bpm += 2 * by;
   }
 
 }

@@ -1,10 +1,12 @@
 import { Value } from './value';
 import { TimeSignature } from './time-signature';
 import { Rhythm } from '../rhythm/rhythm';
+import { Binary } from '@angular/compiler';
 
 export class ValueGeneratorSettings {
-  private static readonly standardRythms: Rhythm[] = [
+  private static readonly standardRhythms: Rhythm[][] = [[
     new Rhythm([Value.QUARTER]),
+    new Rhythm([Value.QUARTER_REST]),
     new Rhythm([Value.HALF]),
     new Rhythm([Value.HALF_DOTTED]),
     new Rhythm([Value.WHOLE]),
@@ -17,11 +19,19 @@ export class ValueGeneratorSettings {
     new Rhythm([Value.SIXTEENTH, Value.EIGHTH, Value.SIXTEENTH]),
     new Rhythm([Value.EIGHTH_REST, Value.EIGHTH]),
     new Rhythm([Value.EIGHTH, Value.EIGHTH, Value.EIGHTH], Value.QUARTER.ticks),
-  ];
+  ], [new Rhythm([Value.QUARTER_DOTTED]),
+  new Rhythm([Value.QUARTER_DOTTED_REST]),
+  new Rhythm([Value.QUARTER, Value.EIGHTH]),
+  new Rhythm([Value.EIGHTH, Value.EIGHTH, Value.EIGHTH]),
+  new Rhythm([Value.HALF_DOTTED]),
+  new Rhythm(new Array<Value>(6).fill(Value.SIXTEENTH)),
+  new Rhythm([Value.EIGHTH_DOTTED, Value.SIXTEENTH, Value.EIGHTH]),
+  ]];
 
   // Rythm section
+  mode: ValueGeneratorSettings.RhythmicMode;
   nbBeats: number;
-  allowedRhythms: ValueGeneratorSettings.StandardRhythm[];
+  allowedRhythms: Rhythm[];
   timeSignature: TimeSignature;
 
   /**
@@ -30,32 +40,25 @@ export class ValueGeneratorSettings {
    * @returns a sequence of `Value`
    *
    */
-  public static getRhythm(rhythm: ValueGeneratorSettings.StandardRhythm): Rhythm {
-    return ValueGeneratorSettings.standardRythms[rhythm];
+  public static getRhythm(rhythmicMode: ValueGeneratorSettings.RhythmicMode, rhythm: number): Rhythm {
+    return ValueGeneratorSettings.standardRhythms[rhythmicMode][rhythm];
   }
 
+
+  public static getStandardRhythms(rhythmicMode: ValueGeneratorSettings.RhythmicMode): Rhythm[] {
+    switch (rhythmicMode) {
+      case ValueGeneratorSettings.RhythmicMode.Binary:
+      case ValueGeneratorSettings.RhythmicMode.Ternary:
+        return ValueGeneratorSettings.standardRhythms[rhythmicMode];
+      default:
+        throw "unsupported rhythmic mode:" + rhythmicMode;
+    }
+  }
 }
 
 export namespace ValueGeneratorSettings {
-  export enum StandardRhythm {
-    Quarter = 0,
-    Half,
-    HalfDotted,
-    Whole,
-    TwoEights,
-    EightDottedSixteenth,
-    QuarterDottedEight,
-    FourSixteenth,
-    EighthTwoSixteenths,
-    TwoSixteenthsEighth,
-    Syncopette,
-    EighthRestEighth,
-    Triplet,
-  }
-  export function getStandardRhythmValues(): string[] {
-    return Object.keys(StandardRhythm).map(key => StandardRhythm[key]).filter(value => typeof value === 'string');
-  }
-  export function getStandardRhythm(s: string): StandardRhythm {
-    return StandardRhythm[s];
+  export enum RhythmicMode {
+    Binary = 0,
+    Ternary
   }
 }
