@@ -18,7 +18,14 @@ export class ValueGeneratorSettings {
     new Rhythm([Value.SIXTEENTH, Value.EIGHTH, Value.SIXTEENTH]),
     new Rhythm([Value.EIGHTH_REST, Value.EIGHTH]),
     new Rhythm([Value.EIGHTH, Value.EIGHTH, Value.EIGHTH], Value.QUARTER.ticks),
-  ], []];
+  ], [new Rhythm([Value.QUARTER_DOTTED]),
+  new Rhythm([Value.QUARTER_DOTTED_REST]),
+  new Rhythm([Value.QUARTER, Value.EIGHTH]),
+  new Rhythm([Value.EIGHTH, Value.EIGHTH, Value.EIGHTH]),
+  new Rhythm([Value.HALF_DOTTED]),
+  new Rhythm(new Array<Value>(6).fill(Value.SIXTEENTH)),
+  new Rhythm([Value.EIGHTH_DOTTED, Value.SIXTEENTH, Value.EIGHTH]),
+  ]];
 
   // Rythm section
   mode: ValueGeneratorSettings.RhythmicMode;

@@ -103,12 +103,24 @@
       </h3>
     </div>
   </div>
+  <!-- Rhythmic mode selection -->
+  <div class="custom-control custom-radio">
+    <input type="radio" class="custom-control-input" id="defaultChecked" name="defaultExampleRadios" checked
+      (change)="setRhythmicMode(ValueGeneratorSettings.RhythmicMode.Binary)">
+    <label class="custom-control-label" for="defaultChecked">Binaire</label>
+  </div>
+  <div class="custom-control custom-radio">
+    <input type="radio" class="custom-control-input" id="defaultUnchecked" name="defaultExampleRadios"
+      (change)="setRhythmicMode(ValueGeneratorSettings.RhythmicMode.Ternary)">
+    <label class="custom-control-label" for="defaultUnchecked">Ternaire</label>
+  </div>
+
   <div class="row align-items-center">
     <div *ngFor="let music of totalRhythms; even as e; index as i;">
       <div style="text-align: center;" [class]="e ? 'bg-light' : ''">
         <app-score-view [notes]="music" [showOnlyRhythm]="true" [isVisible]="true" [displayClef]="true"
-          [displayTimeSignature]="false"></app-score-view>
-        <input type="checkbox" [checked]="selectedRhyhtms[i]" (change)="selectedRhyhtms[i] = !selectedRhyhtms[i]">
+          [displayTimeSignature]="false" [rhythmicMode]="rhythmicMode"></app-score-view>
+        <input type="checkbox" [checked]="selectedRhythms[i]" (change)="selectedRhythms[i] = !selectedRhythms[i]">
       </div>
     </div>
   </div>
@@ -154,7 +166,7 @@
       </div>
     </div>
     <div class="col-sm-1" style="height:100%;">
-      <span class="btn btn-secondary btn-block">{{musicSettings.valueSettings.nbBeats}}
+      <span class="btn btn-secondary btn-block">{{nbBeats}}
       </span>
     </div>
 
@@ -206,8 +218,9 @@
   <div class="row align-items-center"
     [style]="(dictationMode != DictationMode.Global ? 'display:block;' : 'display:none;')">
     <div class="col-sm">
-      <app-score-view #clues [showOnlyPitches]="dictationMode==DictationMode.Rhythmic" [notes]="notes ? notes : undefined"
-        [displayClef]="true" [timeSignature]="musicSettings.valueSettings.timeSignature" [displayTimeSignature]="true"
+      <app-score-view #clues [showOnlyPitches]="dictationMode==DictationMode.Rhythmic"
+        [notes]="notes ? notes : undefined" [displayClef]="true"
+        [timeSignature]="musicSettings.valueSettings.timeSignature" [displayTimeSignature]="true"
         [showOnlyRhythm]="dictationMode==DictationMode.Melodic" [isVisible]="dictationMode != DictationMode.Global">
       </app-score-view>
     </div>
@@ -224,7 +237,7 @@
     </div>
     <div class="col-sm-2">
       <div class="row align-items-center">
-        <app-music-play class="container" [notes]="notes" [addMetronome]="dictationMode!=DictationMode.Melodic">
+        <app-music-play class="container" [notes]="notes" [addMetronome]="dictationMode!=DictationMode.Melodic" [beatValue]="musicPlayBeatValue">
         </app-music-play>
       </div>
       <div class="row align-items-center">
