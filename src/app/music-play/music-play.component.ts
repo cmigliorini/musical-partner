@@ -21,6 +21,8 @@ export class MusicPlayComponent implements OnInit, OnChanges {
   samplesLoaded: boolean;
   playing: boolean = false;
 
+  metronomePart: Tone.Part<{ time: number; value: string; pitch: string; }>;
+  musicPart: Tone.Part<{ time: number; value: number; pitch: string; }>;
 
   constructor() {
     // This will pretty much create a "clave" sound
@@ -35,7 +37,7 @@ export class MusicPlayComponent implements OnInit, OnChanges {
     this.metronomeSynth.envelope.releaseCurve = "exponential";
     this.metronomeSynth.oscillator.type = "sine";
 
-    this.piano = new Piano({ maxPolyphony: 5, velocities:1 }).toDestination();
+    this.piano = new Piano({ maxPolyphony: 5, velocities: 1 }).toDestination();
     this.piano.load().then(() => this.samplesLoaded = true);
 
   }
@@ -43,36 +45,43 @@ export class MusicPlayComponent implements OnInit, OnChanges {
   ngOnInit(): void {
   }
   ngOnChanges(): void {
-    // TODO: Convert  Rythms to (string[], value) notes so that play don't compute stuff
     if (this.notes == null) {
       return;
     }
-  }
+    Tone.Transport.stop();
+    Tone.Transport.bpm.value = this.tempo;
 
-  play(time: number) {
-    let bps = Tone.Transport.bpm.value / 60;
-    let ticksPerSecond = this.beatValue.ticks * bps;
+    const bps = Tone.Transport.bpm.value / 60;
+    const ticksPerSecond = this.beatValue.ticks * bps;
+    // if we need to add a metronome, we'll  generate a part for it
+    if (this.metronomePart) {
+      this.metronomePart = this.metronomePart.clear();
+    }
 
-    console.debug('starting play at ' + time);
-    // if we need to add a metronome, we'll  generate a loop
     if (this.addMetronome) {
-      let metronomeStartTime: number = time + 0.5;
+      let metronomeStartTime: number = 0;
       // Total number of beats
       const nbTotalTicks: number = this.notes.map(v => v.rhythm.span).reduce((s, t) => s + t);
       const nbTotalBeats: number = nbTotalTicks / this.beatValue.ticks;
       // console.log('nbTotalTicks {}, nbTotalBeats {}', nbTotalTicks, nbTotalBeats);
-      let metronomeSynth: Tone.Synth = this.metronomeSynth;
-      
+
       const beatTime: number = Tone.Time(this.beatValue.ticks / ticksPerSecond).toSeconds();
+
+      let metronomeNotes: { time: number, value:string, pitch:string }[] = [];
       Array(nbTotalBeats).fill(1).forEach(i => {
-        metronomeSynth.triggerAttackRelease('c6', '32n', metronomeStartTime);
-        // console.log('c6/32n @' + metronomeStartTime.toString());
+        metronomeNotes.push({ time: metronomeStartTime,  pitch: 'c6', value: '32n' });
         metronomeStartTime += beatTime;
       });
-    }
 
-    let startTime: number = time + 0.5;
-    let piano: Piano = this.piano;
+      this.metronomePart = new Tone.Part((time:number, note) => {
+        this.metronomeSynth.triggerAttackRelease(note.pitch, note.value, time);
+      }, metronomeNotes).start(0);
+    }
+    
+    // Generate a Part for music
+    // First, the notes
+    let musicNotes: { time: number, value: number, pitch: string }[] = [];
+    let startTime: number = 0;
     this.notes.forEach((music: Music) => {
       // Manage tuplets
       let tickFactor = music.rhythm.isTuplet ?
@@ -85,49 +94,41 @@ export class MusicPlayComponent implements OnInit, OnChanges {
         if (!v.isRest) {
           let pitches: string[] = [];
           music.notes[i].notes.forEach(scaleNote => pitches.push(music.scale.toPitch(scaleNote).getEnglishString()));
-          // console.log(pitches.toString() + '/' + value.toString() + ' @' + startTime.toString());
+          console.log(pitches.toString() + '/' + value.toString() + ' @' + startTime.toString());
           // Schedule play
-          pitches.forEach(p => piano.keyDown({ note: p, time: startTime }).keyUp({ note: p, time: startTime + value }));
+          pitches.forEach(p => musicNotes.push({ time: startTime, pitch: p, value: value }));
         }
         startTime += value;
       });
     });
-    //Tone.Transport.stop(startTime + 0.1);
-    //Tone.Transport.scheduleOnce(this.endOfPlay.bind(this), startTime);
+
+    // Then the Part itself
+    if (this.musicPart) {
+      this.musicPart = this.musicPart.clear();
+    }
+    this.musicPart = new Tone.Part((time:number, note) => {
+      this.piano.keyDown({ note: note.pitch, time: time }).keyUp({ note: note.pitch, time: time + note.value });
+    }, musicNotes).start(0);
+
   }
-  // endOfPlay() {
-  //   this.playing = false;
-  // }
+
+  // Called to start playing
   onStart() {
     if (this.notes == null) {
       return;
     }
     if (Tone.Transport.state === "started") {
-      console.log("stopping Tone");
       this.onStop();
     }
-    Tone.start();
 
     if (Tone.Transport.state !== "stopped") {
-      console.debug("aldready running");
       return;
     }
-    Tone.Transport.bpm.value = this.tempo;
-    //this.playing = true;
-    // TODO: schedule end of play somehow, setting "playing=false"
-    Tone.Transport.scheduleOnce(this.play.bind(this), 0);
 
     Tone.Transport.start();
   }
 
   onStop() {
-    if (Tone.Transport.state !== "started") {
-      console.debug("not started");
-      return;
-    }
-    console.log("stopping Tone Transport");
-    let position = Tone.Transport.position;
-    let positionSeconds = Tone.Time(position).toSeconds();
-    Tone.Transport.stop(positionSeconds);
+    Tone.Transport.stop();
   }
 }

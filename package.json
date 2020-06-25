@@ -23,7 +23,7 @@
     "@ng-bootstrap/ng-bootstrap": "^6.1.0",
     "@tonejs/piano": "^0.2.1",
     "rxjs": "~6.5.4",
-    "tone": "^14.5.43",
+    "tone": "^14.7.12",
     "tslib": "^1.10.0",
     "vexflow": "git+ssh://git@github.com/cmigliorini/vexflow.git#1.2.88+autobeamfix",
     "webmidi": "^2.5.1",
