@@ -1,8 +1,8 @@
 import { Component, OnInit, Input, OnChanges } from '@angular/core';
 import { Music } from '../music/music';
 import { Value } from '../values/value';
+import { Piano } from '@tonejs/piano'
 import * as Tone from "tone";
-import { Envelope } from 'tone';
 
 @Component({
   selector: 'app-music-play',
@@ -16,8 +16,13 @@ export class MusicPlayComponent implements OnInit, OnChanges {
   @Input() beatValue: Value;
   @Input() tempo: number
 
-  private synth: Tone.PolySynth;
+  private piano: Piano;
   private metronomeSynth: Tone.Synth;
+  samplesLoaded: boolean;
+  playing: boolean = false;
+
+  metronomePart: Tone.Part<{ time: number; value: string; pitch: string; }>;
+  musicPart: Tone.Part<{ time: number; value: number; pitch: string; }>;
 
   constructor() {
     // This will pretty much create a "clave" sound
@@ -25,51 +30,58 @@ export class MusicPlayComponent implements OnInit, OnChanges {
     this.metronomeSynth.portamento = 0;
     this.metronomeSynth.envelope.attack = 0.01;
     this.metronomeSynth.envelope.attackCurve = "linear";
-    this.metronomeSynth.envelope.decay = 0.1;
+    this.metronomeSynth.envelope.decay = 0.05;
     this.metronomeSynth.envelope.decayCurve = "exponential";
-    this.metronomeSynth.envelope.sustain = 0.1;
-    this.metronomeSynth.envelope.release = 0.01;
+    this.metronomeSynth.envelope.sustain = 0.002;
+    this.metronomeSynth.envelope.release = 0.00;
     this.metronomeSynth.envelope.releaseCurve = "exponential";
     this.metronomeSynth.oscillator.type = "sine";
 
-    //this.synth = new Tone.PolySynth().toDestination();
-    //this.synth.set({envelope: { release:0.01}});
+    this.piano = new Piano({ maxPolyphony: 5, velocities: 1 }).toDestination();
+    this.piano.load().then(() => this.samplesLoaded = true);
+
   }
 
   ngOnInit(): void {
   }
   ngOnChanges(): void {
-    // Convert  Rythms to Synth notes.
     if (this.notes == null) {
       return;
     }
-  }
+    Tone.Transport.stop();
+    Tone.Transport.bpm.value = this.tempo;
 
-  play(time: number) {
-    // TODO: @Input() this
-    let bps = Tone.Transport.bpm.value / 60;
-    let ticksPerSecond = this.beatValue.ticks * bps;
+    const bps = Tone.Transport.bpm.value / 60;
+    const ticksPerSecond = this.beatValue.ticks * bps;
+    // if we need to add a metronome, we'll  generate a part for it
+    if (this.metronomePart) {
+      this.metronomePart = this.metronomePart.clear();
+    }
 
-    console.debug('starting play at ' + time);
-    // if we need to add a metronome, we'll  generate a loop
     if (this.addMetronome) {
-      let metronomeStartTime: number = time + 0.5;
+      let metronomeStartTime: number = 0;
       // Total number of beats
       const nbTotalTicks: number = this.notes.map(v => v.rhythm.span).reduce((s, t) => s + t);
       const nbTotalBeats: number = nbTotalTicks / this.beatValue.ticks;
       // console.log('nbTotalTicks {}, nbTotalBeats {}', nbTotalTicks, nbTotalBeats);
-      let metronomeSynth: Tone.Synth = this.metronomeSynth;
-      
+
       const beatTime: number = Tone.Time(this.beatValue.ticks / ticksPerSecond).toSeconds();
+
+      let metronomeNotes: { time: number, value:string, pitch:string }[] = [];
       Array(nbTotalBeats).fill(1).forEach(i => {
-        metronomeSynth.triggerAttackRelease('c6', '32n', metronomeStartTime);
-        // console.log('c6/32n @' + metronomeStartTime.toString());
+        metronomeNotes.push({ time: metronomeStartTime,  pitch: 'c6', value: '32n' });
         metronomeStartTime += beatTime;
       });
-    }
 
-    let startTime: number = time + 0.5;
-    let synth: Tone.PolySynth = this.synth;
+      this.metronomePart = new Tone.Part((time:number, note) => {
+        this.metronomeSynth.triggerAttackRelease(note.pitch, note.value, time);
+      }, metronomeNotes).start(0);
+    }
+    
+    // Generate a Part for music
+    // First, the notes
+    let musicNotes: { time: number, value: number, pitch: string }[] = [];
+    let startTime: number = 0;
     this.notes.forEach((music: Music) => {
       // Manage tuplets
       let tickFactor = music.rhythm.isTuplet ?
@@ -82,16 +94,25 @@ export class MusicPlayComponent implements OnInit, OnChanges {
         if (!v.isRest) {
           let pitches: string[] = [];
           music.notes[i].notes.forEach(scaleNote => pitches.push(music.scale.toPitch(scaleNote).getEnglishString()));
-          // console.log(pitches.toString() + '/' + value.toString() + ' @' + startTime.toString());
+          console.log(pitches.toString() + '/' + value.toString() + ' @' + startTime.toString());
           // Schedule play
-          synth.triggerAttackRelease(pitches, value, startTime);
+          pitches.forEach(p => musicNotes.push({ time: startTime, pitch: p, value: value }));
         }
         startTime += value;
       });
     });
-    Tone.Transport.stop(startTime);
+
+    // Then the Part itself
+    if (this.musicPart) {
+      this.musicPart = this.musicPart.clear();
+    }
+    this.musicPart = new Tone.Part((time:number, note) => {
+      this.piano.keyDown({ note: note.pitch, time: time }).keyUp({ note: note.pitch, time: time + note.value });
+    }, musicNotes).start(0);
 
   }
+
+  // Called to start playing
   onStart() {
     if (this.notes == null) {
       return;
@@ -100,32 +121,14 @@ export class MusicPlayComponent implements OnInit, OnChanges {
       this.onStop();
     }
 
-    if (this.synth == null) {
-      this.synth = new Tone.PolySynth({ maxPolyphony: 5, voice: Tone.Synth }).toDestination();
-      this.synth.set({envelope:{release:0.01}});
-    }
-    if (this.metronomeSynth == null) {
-      this.metronomeSynth = new Tone.Synth().toDestination();
-    }
-
     if (Tone.Transport.state !== "stopped") {
-      console.debug("aldready running");
       return;
     }
-    Tone.Transport.bpm.value = this.tempo;
-    Tone.Transport.stop();
-    Tone.Transport.scheduleOnce(this.play.bind(this), 0);
 
     Tone.Transport.start();
-  };
+  }
 
   onStop() {
-    if (Tone.Transport.state !== "started") {
-      console.debug("not started");
-      return;
-    }
-    let position = Tone.Transport.position;
-    let positionSeconds = Tone.Time(position).toSeconds();
-    Tone.Transport.stop(positionSeconds + 1);
-  };
+    Tone.Transport.stop();
+  }
 }
