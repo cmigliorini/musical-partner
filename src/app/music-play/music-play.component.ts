@@ -114,6 +114,7 @@ export class MusicPlayComponent implements OnInit, OnChanges {
 
   // Called to start playing
   onStart() {
+    Tone.start();
     if (this.notes == null) {
       return;
     }
