@@ -1,8 +1,10 @@
-import { Injectable, Input } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { ScaleNote } from './scale-note';
 import { ScaleNoteGeneratorSettings } from './scale-note-generator-settings';
-import { Value } from '../values/value';
 import { Rhythm } from '../rhythm/rhythm';
+import { Scale } from '../music/scale';
+import { Mode } from './mode.enum';
+import * as _ from 'lodash';
 
 @Injectable({
   providedIn: 'root'
@@ -11,10 +13,15 @@ export class ScaleNoteGeneratorService {
   settings: ScaleNoteGeneratorSettings;
 
   constructor(settings: ScaleNoteGeneratorSettings) {
-    this.settings = settings;
+    this.settings = _.cloneDeep(settings);
     if (typeof this.settings.nbAccidentals === 'number' && this.settings.nbAccidentals !== 0) {
       throw '';
-    }
+    };
+    // Interpret lowest and higest note in C Major scale
+    const cMajorScale: Scale = new Scale(new ScaleNote(0, null), Mode.Major);
+    this.settings.highestNote = this.settings.scale.fromPitch(cMajorScale.toPitch(this.settings.highestNote));
+    this.settings.lowestNote = this.settings.scale.fromPitch(cMajorScale.toPitch(this.settings.lowestNote));
+
   }
   /**
    * generateScaleNotes
