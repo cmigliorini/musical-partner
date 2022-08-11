@@ -41,13 +41,27 @@
   <div class="row justify-content-center align-items-center">
     <div class="col-sm">
       <div class="row align-items-center">
+        <div class="col-sm-3 align-items-center">
+          <h2>
+            <div class="badge badge-light"><span>Mode</span></div>
+          </h2>
+          <div>
+            <div class="btn-group  btn-group-toggle" ngbRadioGroup name="radioBasic">
+              <label ngbButtonLabel class="btn-secondary">
+                <input ngbButton type="radio" (click)="setMajorMode()"> Majeur
+              </label>
+              <label ngbButtonLabel class="btn-secondary">
+                <input ngbButton type="radio" (click)="setMinorMode()"> Mineur
+              </label>
+            </div>
+          </div>
+        </div>
         <div class="col-sm-1">
           <div class="row align-items-center">
             <button class="btn btn-info  btn-block" (click)="adjustLowestNote(+1)">↑</button>
           </div>
           <div class="row align-items-center">
-            <div class="col-sm">
-              <div class="badge badge-light"><span>note basse</span></div>
+            <div class="col-sm">           <div class="badge badge-light"><span>note basse</span></div>
             </div>
           </div>
           <div class="row align-items-center">
