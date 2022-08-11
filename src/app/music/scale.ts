@@ -15,7 +15,7 @@ export class Scale {
   readonly scale: number[];
   readonly fundamentalPitch: number;
   private static readonly majorScale: number[] = [0, 2, 4, 5, 7, 9, 11];
-  private static readonly minorScale: number[] = [0, 2, 3, 5, 7, 9, 10];
+  private static readonly minorScale: number[] = [0, 2, 3, 5, 7, 8, 11];
 
   /**
    * builds a scale based on `basePitch`,
@@ -25,7 +25,6 @@ export class Scale {
   constructor(basePitch: ScaleNote, mode: Mode) {
     this.fundamental = new ScaleNote(basePitch.degree % 7, basePitch.alteration);
     this.fundamentalPitch = Scale.majorScale[this.fundamental.degree] + (basePitch.alteration ? basePitch.alteration : 0);
-    //console.log('fundamental=(' + this.fundamental.degree + ',' + this.fundamental.alteration + '), basePitch=' + Scale.majorScale[this.fundamental.degree] + ', basePitch.alteration=' + basePitch.alteration + ', fundamentalPitch=' + this.fundamentalPitch);
     switch (mode) {
       case Mode.Major:
         this.scale = Scale.majorScale;
@@ -49,5 +48,20 @@ export class Scale {
     const pitch = this.fundamentalPitch + 12 * octave + this.scale[scaleNote.degree % 7] + alteration;
     //console.log('degree=' + scaleNote.degree + ', alteration=' + alteration + ', pitch=' + pitch)
     return new Pitch(pitch);
+  }
+  public fromPitch(pitch: Pitch) : ScaleNote {
+    const octave: number = Math.floor((pitch.key - this.fundamentalPitch) / 12);
+    const relativePitch:number = pitch.key - octave * 12 - this.fundamentalPitch;
+    const basePitch: number = this.scale.filter((a) => a <= relativePitch).reduce((oldMax, current) => Math.max(oldMax, current), 0);
+    let degree: number = this.scale.indexOf(basePitch);
+    let alteration: number = relativePitch - this.scale[degree] || null;
+    if (alteration > 1) {
+      // TODO: this fixes the "minor" mode issue on 7th degree, but should probably be handled differently
+      degree += 1;
+      alteration = -1;
+      console.debug("minor mode hack")
+    }
+    console.debug("pitch:", pitch, "relative pitch:", relativePitch, "octave:", octave, "baseDegree:", basePitch, "degree:", degree, "alteration:", alteration);
+    return new ScaleNote(degree + 7 * octave, alteration);
   }
 }

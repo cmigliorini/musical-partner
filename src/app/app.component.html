@@ -5,7 +5,7 @@
       <p class="lead">Bonjour ! Je suis un programme qui invente automatiquement des dictées musicales, te permet de les
         écouter et de vérifier ce que tu as trouvé en lisant la solution.</p>
       <p><span class="badge badge-info">Nouveau</span><em>
-          Je sais dorénavant te proposer des dictées de rythmes !</em></p>
+          Depuis l'été 2022, je sais te proposer des dictées majeures et mineures !</em></p>
     </div>
   </div>
   <div class="row align-items-center">
@@ -41,13 +41,27 @@
   <div class="row justify-content-center align-items-center">
     <div class="col-sm">
       <div class="row align-items-center">
+        <div class="col-sm-3 align-items-center">
+          <h2>
+            <div class="badge badge-light"><span>Tonalité</span></div>
+          </h2>
+          <div>
+            <div class="btn-group  btn-group-toggle" ngbRadioGroup name="radioBasic">
+              <label ngbButtonLabel class="btn-info">
+                  <input ngbButton type="radio" (click)="setMajorMode()"> Do Majeur
+              </label>
+              <label ngbButtonLabel class="btn-warning">
+                <input ngbButton type="radio" (click)="setMinorMode()"> La Mineur
+              </label>
+            </div>
+          </div>
+        </div>
         <div class="col-sm-1">
           <div class="row align-items-center">
             <button class="btn btn-info  btn-block" (click)="adjustLowestNote(+1)">↑</button>
           </div>
           <div class="row align-items-center">
-            <div class="col-sm">
-              <div class="badge badge-light"><span>note basse</span></div>
+            <div class="col-sm">           <div class="badge badge-light"><span>note basse</span></div>
             </div>
           </div>
           <div class="row align-items-center">
@@ -303,7 +317,7 @@
     </div>
   </div>
   <div class="container">
-    <p><small class="text-muted"><em>&copy; Christophe Migliorini 2020. Ce site a pu voir le jour grâce aux
+    <p><small class="text-muted"><em>&copy; Christophe Migliorini 2020-2022. Ce site a pu voir le jour grâce aux
           (ou à cause des) circonstances exceptionnelles du confinement général de la population française décrété en
           mars 2020, sur une idée et avec l'aide précieuse de Cécile Coqu, musicienne et professeur de formation
           musicale. View code on <a href="https://github.com/cmigliorini/musical-partner/" target="_blank"

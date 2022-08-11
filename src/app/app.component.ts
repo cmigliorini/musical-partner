@@ -50,8 +50,8 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.musicSettings = new MusicGeneratorSettings;
     // ScaleNote Generator settings
-    this.musicSettings.scale = new Scale(new ScaleNote(0, null), Mode.Major);
     this.musicSettings.scaleNoteSettings = new ScaleNoteGeneratorSettings();
+    this.musicSettings.scaleNoteSettings.scale = new Scale(new ScaleNote(0, null), Mode.Major);
     this.musicSettings.scaleNoteSettings.lowestNote = new ScaleNote(7 * 5, null);
     this.musicSettings.scaleNoteSettings.highestNote = new ScaleNote(7 * 5 + 4, null);
     this.musicSettings.scaleNoteSettings.maxInterval = 2;
@@ -115,8 +115,15 @@ export class AppComponent implements OnInit {
       // Keep only first note
       .slice(0, 1), new Rhythm([Value.QUARTER]), new Scale(new ScaleNote(0, null), Mode.Major))];
   }
+  setMajorMode() {
+    this.musicSettings.scaleNoteSettings.scale = new Scale(new ScaleNote(0, null), Mode.Major);
+  }
+  setMinorMode() {
+    this.musicSettings.scaleNoteSettings.scale = new Scale(new ScaleNote(5, null), Mode.Minor);
+  }
   adjustLowestNote(by: number) {
-    if (this.musicSettings.scaleNoteSettings.lowestNote.degree + by > this.musicSettings.scaleNoteSettings.highestNote.degree) {
+    if (this.musicSettings.scaleNoteSettings.lowestNote.degree + by >
+       this.musicSettings.scaleNoteSettings.highestNote.degree) {
       return;
     }
     this.musicSettings.scaleNoteSettings.lowestNote.degree += by;
