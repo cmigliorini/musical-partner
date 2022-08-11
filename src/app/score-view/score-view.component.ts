@@ -215,11 +215,13 @@ export class ScoreViewComponent implements OnInit, OnChanges {
           // TODO: this will have to come with more sematics injected into this component (key, etc.) so
           // we know when to add accidentals and which accidentals to use.
           // TODO: we will need to handle accidents  withi a stave so we add "natural" sign and don't repeat accidents
-          music.notes[i].notes.forEach((scaleNote, i) => {
-            if (cmajor_scale.includes(music.scale.toPitch(scaleNote).key % 12)) {
-              baseNote.addAccidental(i, new Vex.Flow.Accidental('#'));
-            }
-          });
+          if (!this.showOnlyRhythm) {
+            music.notes[i].notes.forEach((scaleNote, i_) => {
+              if (cmajor_scale.includes(music.scale.toPitch(scaleNote).key % 12)) {
+                baseNote.addAccidental(i_, new Vex.Flow.Accidental('#'));
+              }
+            });
+          }
           // Add note to current array, unless we showOnlyPitches and this is a rest
           if (!(this.showOnlyPitches && value.isRest)) {
             currentMusicNotes.push(baseNote);
