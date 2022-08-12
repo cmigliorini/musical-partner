@@ -1,7 +1,12 @@
 import { Value } from './value';
 import { TimeSignature } from './time-signature';
 import { Rhythm } from '../rhythm/rhythm';
-import { Binary } from '@angular/compiler';
+
+// *** Binaire
+// quart de soupir trois doubles
+// croche noire croche
+// double, croche pointée
+// croche triolet de doubles
 
 export class ValueGeneratorSettings {
   private static readonly standardRhythms: Rhythm[][] = [[
@@ -19,13 +24,34 @@ export class ValueGeneratorSettings {
     new Rhythm([Value.SIXTEENTH, Value.EIGHTH, Value.SIXTEENTH]),
     new Rhythm([Value.EIGHTH_REST, Value.EIGHTH]),
     new Rhythm([Value.EIGHTH, Value.EIGHTH, Value.EIGHTH], Value.QUARTER.ticks),
-  ], [new Rhythm([Value.QUARTER_DOTTED]),
-  new Rhythm([Value.QUARTER_DOTTED_REST]),
-  new Rhythm([Value.QUARTER, Value.EIGHTH]),
-  new Rhythm([Value.EIGHTH, Value.EIGHTH, Value.EIGHTH]),
-  new Rhythm([Value.HALF_DOTTED]),
-  new Rhythm(new Array<Value>(6).fill(Value.SIXTEENTH)),
-  new Rhythm([Value.EIGHTH_DOTTED, Value.SIXTEENTH, Value.EIGHTH]),
+    new Rhythm([Value.SIXTEENTH_REST, Value.SIXTEENTH, Value.SIXTEENTH, Value.SIXTEENTH,]),
+    new Rhythm([Value.EIGHTH, Value.QUARTER, Value.EIGHTH]),
+    new Rhythm([Value.SIXTEENTH, Value.EIGHTH_DOTTED]),
+  ], [
+    // ** Ternaire
+    // croche noire
+    // croche croche deux doubles
+    // croche deux doubles, croche
+    // deux doubles, deux croches
+    // noire deux doubles
+    // demi-soupir deux croches (et permutations)
+
+    new Rhythm([Value.QUARTER_DOTTED]),
+    new Rhythm([Value.QUARTER_DOTTED_REST]),
+    new Rhythm([Value.QUARTER, Value.EIGHTH]),
+    new Rhythm([Value.EIGHTH, Value.EIGHTH, Value.EIGHTH]),
+    new Rhythm([Value.HALF_DOTTED]),
+    new Rhythm(new Array<Value>(6).fill(Value.SIXTEENTH)),
+    new Rhythm([Value.EIGHTH_DOTTED, Value.SIXTEENTH, Value.EIGHTH]),
+    new Rhythm([Value.EIGHTH, Value.QUARTER]),
+    new Rhythm([Value.EIGHTH, Value.EIGHTH, Value.SIXTEENTH, Value.SIXTEENTH]),
+    new Rhythm([Value.EIGHTH, Value.SIXTEENTH, Value.SIXTEENTH, Value.EIGHTH]),
+    new Rhythm([Value.SIXTEENTH, Value.SIXTEENTH, Value.EIGHTH, Value.EIGHTH]),
+    new Rhythm([Value.QUARTER, Value.SIXTEENTH, Value.SIXTEENTH]),
+    new Rhythm([Value.SIXTEENTH, Value.SIXTEENTH, Value.QUARTER]),
+    new Rhythm([Value.EIGHTH_REST, Value.EIGHTH, Value.EIGHTH]),
+    new Rhythm([Value.EIGHTH, Value.EIGHTH_REST, Value.EIGHTH]),
+    new Rhythm([Value.EIGHTH, Value.EIGHTH, Value.EIGHTH_REST]),
   ]];
 
   // Rythm section
