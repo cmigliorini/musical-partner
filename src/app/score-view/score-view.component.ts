@@ -181,7 +181,7 @@ export class ScoreViewComponent implements OnInit, OnChanges {
           // Let's determine  the headstyle in the case of rhythms only
           let noteKeys: string[];
           if (this.showOnlyRhythm) {
-            noteKeys = value.ticks >= Value.HALF.ticks ? ['b/4/x3'] : ['x/'];
+            noteKeys = value.ticks >= Value.HALF.ticks ? ['g/4/x3'] : ['g/4/X2'];
           } else {
             noteKeys = music.notes[i].notes.map(scaleNote => this.note_height(music.scale.toPitch(scaleNote).key)
               // change note head if we hide stems
