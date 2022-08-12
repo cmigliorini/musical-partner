@@ -5,7 +5,10 @@
       <p class="lead">Bonjour ! Je suis un programme qui invente automatiquement des dictées musicales, te permet de les
         écouter et de vérifier ce que tu as trouvé en lisant la solution.</p>
       <p><span class="badge badge-info">Nouveau</span><em>
-          Depuis l'été 2022, je sais te proposer des dictées majeures et mineures !</em></p>
+          Depuis l'été 2022, je sais te proposer des dictées majeures et mineures, ainsi que de nouveaux rythmes, qui devraient couvrir le cycle II.</em></p>
+      <p><span class="badge badge-warning">Attention</span><em>
+          Malheureusement, je ne fonctionne pas sur le navigateur Safari (macOS) : si tu utilises un ordinateur, préfère Chrome ou
+          Firefox. Mais tu peux m'utiliser sur un iPhone ou un iPad.</em></p>
     </div>
   </div>
   <div class="row align-items-center">
@@ -43,15 +46,15 @@
       <div class="row align-items-center">
         <div class="col-sm-3 align-items-center">
           <h2>
-            <div class="badge badge-light"><span>Tonalité</span></div>
+            <div class="badge badge-light"><span>Mode</span></div>
           </h2>
           <div>
             <div class="btn-group  btn-group-toggle" ngbRadioGroup name="radioBasic">
               <label ngbButtonLabel class="btn-info">
-                  <input ngbButton type="radio" (click)="setMajorMode()"> Do Majeur
+                  <input ngbButton type="radio" (click)="setMajorMode()"> Majeur
               </label>
               <label ngbButtonLabel class="btn-warning">
-                <input ngbButton type="radio" (click)="setMinorMode()"> La Mineur
+                <input ngbButton type="radio" (click)="setMinorMode()"> Mineur
               </label>
             </div>
           </div>
@@ -110,6 +113,7 @@
       </div>
     </div>
   </div>
+  <p><span class="badge badge-info">Note</span> <span> si tu sélectionnes le mode mineur, il y aura des altérations accidentelles à trouver !</span></p>
   <div class="row align-items-center mt-2 pt-2 app-heading">
     <div class="col-sm">
       <h3>
