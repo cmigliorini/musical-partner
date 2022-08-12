@@ -18,9 +18,11 @@ export class ScaleNoteGeneratorService {
       throw '';
     };
     // Interpret lowest and higest note in C Major scale
-    const cMajorScale: Scale = new Scale(new ScaleNote(0, null), Mode.Major);
-    this.settings.highestNote = this.settings.scale.fromPitch(cMajorScale.toPitch(this.settings.highestNote));
-    this.settings.lowestNote = this.settings.scale.fromPitch(cMajorScale.toPitch(this.settings.lowestNote));
+    if (this.settings && this.settings.scale && this.settings.highestNote && this.settings.lowestNote) {
+      const cMajorScale: Scale = new Scale(new ScaleNote(0, null), Mode.Major);
+      this.settings.highestNote = this.settings.scale.fromPitch(cMajorScale.toPitch(this.settings.highestNote));
+      this.settings.lowestNote = this.settings.scale.fromPitch(cMajorScale.toPitch(this.settings.lowestNote));
+    }
 
   }
   /**
