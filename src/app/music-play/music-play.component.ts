@@ -94,7 +94,7 @@ export class MusicPlayComponent implements OnInit, OnChanges {
         if (!v.isRest) {
           let pitches: string[] = [];
           music.notes[i].notes.forEach(scaleNote => pitches.push(music.scale.toPitch(scaleNote).getEnglishString()));
-          console.log(pitches.toString() + '/' + value.toString() + ' @' + startTime.toString());
+          // console.log(pitches.toString() + '/' + value.toString() + ' @' + startTime.toString());
           // Schedule play
           pitches.forEach(p => musicNotes.push({ time: startTime, pitch: p, value: value }));
         }
