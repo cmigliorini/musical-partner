@@ -59,9 +59,9 @@ export class Scale {
       // TODO: this fixes the "minor" mode issue on 7th degree, but should probably be handled differently
       degree += 1;
       alteration = -1;
-      console.debug("minor mode hack")
+      // console.debug("minor mode hack")
     }
-    console.debug("pitch:", pitch, "relative pitch:", relativePitch, "octave:", octave, "baseDegree:", basePitch, "degree:", degree, "alteration:", alteration);
+    // console.debug("pitch:", pitch, "relative pitch:", relativePitch, "octave:", octave, "baseDegree:", basePitch, "degree:", degree, "alteration:", alteration);
     return new ScaleNote(degree + 7 * octave, alteration);
   }
 }
