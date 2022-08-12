@@ -49,14 +49,16 @@
             <div class="badge badge-light"><span>Mode</span></div>
           </h2>
           <div>
-            <div class="btn-group  btn-group-toggle" ngbRadioGroup name="radioBasic">
-              <label ngbButtonLabel class="btn-info">
-                  <input ngbButton type="radio" (click)="setMajorMode()"> Majeur
+            <form [formGroup]="modeForm">
+              <div class="btn-group  btn-group-toggle" ngbRadioGroup formControlName="mode">
+              <label ngbButtonLabel [class]="this.modeForm.get('mode').value==eScaleMode.Major?'btn-warning':'btn-light'">
+                  <input ngbButton type="radio" [value]="eScaleMode.Major"> Majeur
               </label>
-              <label ngbButtonLabel class="btn-warning">
-                <input ngbButton type="radio" (click)="setMinorMode()"> Mineur
+              <label ngbButtonLabel [class]="this.modeForm.get('mode').value==eScaleMode.Minor?'btn-warning':'btn-light'">
+                <input ngbButton type="radio" [value]="eScaleMode.Minor"> Mineur
               </label>
             </div>
+            </form>
           </div>
         </div>
         <div class="col-sm-1">
@@ -112,8 +114,13 @@
         </div>
       </div>
     </div>
-  </div>
-  <p><span class="badge badge-info">Note</span> <span> si tu sélectionnes le mode mineur, il y aura des altérations accidentelles à trouver !</span></p>
+  </div><p>
+    <span *ngIf="this.modeForm.get('mode').value==1" >
+      <span class="badge badge-info">Attention</span> <span> Tu as sélectionné
+        le mode mineur, il y aura des altérations accidentelles à trouver !</span>
+      </span>
+      &nbsp;
+  </p>
   <div class="row align-items-center mt-2 pt-2 app-heading">
     <div class="col-sm">
       <h3>

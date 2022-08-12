@@ -1,7 +1,6 @@
 import { ScaleNote } from '../scale-notes/scale-note';
 import { Pitch } from '../models/pitch';
 import { Mode } from '../scale-notes/mode.enum';
-import { Alteration } from '../scale-notes/alteration.enum';
 
 /**
  * represents a scale, like C Sharp minor for instance.

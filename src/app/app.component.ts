@@ -1,17 +1,17 @@
-import { Component, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Music } from './music/music';
 import { Chord } from './music/note';
 import { Value } from './values/value';
 import { ScaleNote } from './scale-notes/scale-note';
-import { Mode } from './scale-notes/mode.enum';
 import { Scale } from './music/scale';
 import { MusicGeneratorService } from './music/music-generator.service';
 import { MusicGeneratorSettings } from './music/music-generator-settings';
 import { ScaleNoteGeneratorSettings } from './scale-notes/scale-note-generator-settings';
 import { ValueGeneratorSettings } from './values/value-generator-settings';
 import { TimeSignature } from './values/time-signature';
-import { FormControl } from '@angular/forms';
 import { Rhythm } from './rhythm/rhythm';
+import { FormControl, FormGroup } from '@angular/forms';
+import { Mode } from './scale-notes/mode.enum';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +19,10 @@ import { Rhythm } from './rhythm/rhythm';
   styleUrls: ['./app.component.sass']
 })
 export class AppComponent implements OnInit {
+  eScaleMode: typeof Mode = Mode;
+  modeForm = new FormGroup({
+    mode: new FormControl(Mode.Major)
+  });
   title = 'ear-partner';
   notes: Music[];
   lowestNote: Music[];
@@ -47,6 +51,7 @@ export class AppComponent implements OnInit {
   constructor(private musicgen: MusicGeneratorService) {
 
   }
+
   ngOnInit() {
     this.musicSettings = new MusicGeneratorSettings;
     // ScaleNote Generator settings
@@ -70,6 +75,9 @@ export class AppComponent implements OnInit {
     this.bpm = 50;
   }
 
+  ngAfterViewInit(): void {
+    this.modeForm.get('mode').valueChanges.subscribe((_)=>this.updateMode());
+  }
   setRhythmicMode(mode: number) {
     if (this.rhythmicMode == mode) {
       return;
@@ -115,11 +123,15 @@ export class AppComponent implements OnInit {
       // Keep only first note
       .slice(0, 1), new Rhythm([Value.QUARTER]), new Scale(new ScaleNote(0, null), Mode.Major))];
   }
-  setMajorMode() {
-    this.musicSettings.scaleNoteSettings.scale = new Scale(new ScaleNote(0, null), Mode.Major);
-  }
-  setMinorMode() {
-    this.musicSettings.scaleNoteSettings.scale = new Scale(new ScaleNote(5, null), Mode.Minor);
+  updateMode() {
+    switch (this.modeForm.get('mode').value) {
+      case Mode.Major:
+        this.musicSettings.scaleNoteSettings.scale = new Scale(new ScaleNote(0, null), Mode.Major);
+        break;
+      case Mode.Minor:
+        this.musicSettings.scaleNoteSettings.scale = new Scale(new ScaleNote(5, null), Mode.Minor);
+        break;
+    }
   }
   adjustLowestNote(by: number) {
     if (this.musicSettings.scaleNoteSettings.lowestNote.degree + by >
