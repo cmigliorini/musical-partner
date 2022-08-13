@@ -1,13 +1,11 @@
-import { ScaleNote } from './scale-note';
 import { Scale } from '../music/scale';
+import { Pitch } from '../models/pitch';
 
 export class ScaleNoteGeneratorSettings {
   scale: Scale;
-  // Must be interpreted in "absolute" scale, i.e. Scale(ScaleNote(0,null), Mode.Major)
-  lowestNote: ScaleNote;
-  // Must be interpreted in "absolute" scale, i.e. Scale(ScaleNote(0,null), Mode.Major)
-  highestNote: ScaleNote;
+  lowestPitch: Pitch;
+  highestPitch: Pitch;
   // Expressed in degrees
-  maxInterval: number;
-  nbAccidentals: number;
+  maxInterval: number = 0;
+  nbAccidentals: number = 0;
 }

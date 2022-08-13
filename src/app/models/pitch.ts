@@ -16,10 +16,10 @@ export class Pitch {
     if (!Pitch.pitchesEnglish.includes(uCaseScaleValue)) {
       throw 'invalid scaleValue: ' + scaleValue;
     }
-    return (octave + 1) * 12 + (Pitch.pitchesEnglish.indexOf(uCaseScaleValue) % 12);
+    return (octave) * 12 + (Pitch.pitchesEnglish.indexOf(uCaseScaleValue) % 12);
   }
   getOctave(): number {
-    return Math.floor(this.key / 12) - 1;
+    return Math.floor(this.key / 12);
   }
 
   getEnglishString(separator: string = ''): string {
