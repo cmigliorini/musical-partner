@@ -5,6 +5,7 @@ import { Value } from '../values/value';
 import { range } from 'rxjs';
 import { TimeSignature } from '../values/time-signature';
 import { ValueGeneratorSettings } from '../values/value-generator-settings';
+import { Accidental, Barline, Beam, Formatter, Renderer, Stave, StaveNote, Tuplet, Voice } from 'vexflow';
 
 const cmajor_scale: number[] = [1, 3, 6, 8, 10];
 @Component({
@@ -29,10 +30,10 @@ export class ScoreViewComponent implements OnChanges, AfterViewInit {
   // Internals : staves, beams and notes chunked by measure
   // TODO: create a structure to hold stave and notes in a single array element
   // One stave per measure
-  staves: Vex.Flow.Stave[];
+  staves: Stave[];
   // one array of notes per stave
-  private voices: Vex.Flow.Voice[];
-  private tupletsPerMeasure: Vex.Flow.Tuplet[][];
+  private voices: Voice[];
+  private tupletsPerMeasure: Tuplet[][];
   
   // TODO: try to make this dynamic, based on stave content
   DEFAULT_STAVE_WIDTH: number = 300;
@@ -110,7 +111,7 @@ export class ScoreViewComponent implements OnChanges, AfterViewInit {
       if (this.notes == null) {
         return;
       }
-      let current_stave: Vex.Flow.Stave = new Vex.Flow.Stave(0, 0, this.DEFAULT_STAVE_WIDTH);
+      let current_stave: Stave = new Stave(0, 0, this.DEFAULT_STAVE_WIDTH);
       if (this.displayClef) {
         current_stave.addClef("treble");
       }
@@ -131,15 +132,15 @@ export class ScoreViewComponent implements OnChanges, AfterViewInit {
       }
       this.staves.push(current_stave);
 
-      let notes_per_measure: Vex.Flow.StaveNote[][] = [];
-      notes_per_measure.push(new Array<Vex.Flow.StaveNote>());
+      let notes_per_measure: StaveNote[][] = [];
+      notes_per_measure.push(new Array<StaveNote>());
       let current_notes_per_measure = notes_per_measure[0];
       // Store voices for later drawing
       this.voices = [];
 
       // Store tuplets for later drawing
       this.tupletsPerMeasure = [];
-      this.tupletsPerMeasure.push(new Array<Vex.Flow.Tuplet>());
+      this.tupletsPerMeasure.push(new Array<Tuplet>());
       let currentTupletsPerMeasure = this.tupletsPerMeasure[0];
 
       // We'll construct an array of Note arrays, an array of Stave, and an array of Beams for later rendering
@@ -147,13 +148,13 @@ export class ScoreViewComponent implements OnChanges, AfterViewInit {
         // First we might need to create a stave, a new set of notes, if current one is full
         if (ticks >= this.timeSignature.getTotalTicks()) {
           // New stave
-          current_stave = new Vex.Flow.Stave(0, 0, this.DEFAULT_STAVE_WIDTH);
+          current_stave = new Stave(0, 0, this.DEFAULT_STAVE_WIDTH);
           this.staves.push(current_stave);
           // New array of Notes
-          current_notes_per_measure = new Array<Vex.Flow.StaveNote>();
+          current_notes_per_measure = new Array<StaveNote>();
           notes_per_measure.push(current_notes_per_measure);
           // New array of Tuples
-          currentTupletsPerMeasure = new Array<Vex.Flow.Tuplet>();
+          currentTupletsPerMeasure = new Array<Tuplet>();
           this.tupletsPerMeasure.push(currentTupletsPerMeasure);
           // reset ticks counter
           ticks = 0;
@@ -166,7 +167,7 @@ export class ScoreViewComponent implements OnChanges, AfterViewInit {
         // rythm->notes->key[] translated to strings + duration -> stavenote
 
         // We will flow our StaveNotes to an array that will be used later to create tuples if necessary
-        let currentMusicNotes: Vex.Flow.StaveNote[] = [];
+        let currentMusicNotes: StaveNote[] = [];
         music.rhythm.values.forEach((value, i) => {
           let duration: string = this.noteDuration(value.ticks);
           if (value.isRest) {
@@ -186,7 +187,7 @@ export class ScoreViewComponent implements OnChanges, AfterViewInit {
           if (value.isRest) {
             noteKeys = ['b/4'];
           }
-          let baseNote = new Vex.Flow.StaveNote({
+          let baseNote = new StaveNote({
             keys: noteKeys,
             duration: duration
           });
@@ -202,9 +203,10 @@ export class ScoreViewComponent implements OnChanges, AfterViewInit {
             let nbDots = duration.includes('d') ?
               1 + duration.lastIndexOf('d') - duration.indexOf('d')
               : 0;
-            range(0, nbDots).forEach(() =>
-              baseNote.addDotToAll()
-            );
+              // FIXME: did addDotToAll() disappear since 1.2.88 ?
+            // range(0, nbDots).forEach(() =>
+            //   baseNote.addDotToAll()
+            // );
           }
           // Do we have accidentals
           // TODO: this will have to come with more sematics injected into this component (key, etc.) so
@@ -213,7 +215,8 @@ export class ScoreViewComponent implements OnChanges, AfterViewInit {
           if (!this.showOnlyRhythm) {
             music.notes[i].notes.forEach((scaleNote, i_) => {
               if (cmajor_scale.includes(music.scale.toPitch(scaleNote).key % 12)) {
-                baseNote.addAccidental(i_, new Vex.Flow.Accidental('#'));
+                // FIXME: did addAccidental disappear since 1.2.88 ?
+                // baseNote.addAccidental(i_, new Accidental('#'));
               }
             });
           }
@@ -234,7 +237,7 @@ export class ScoreViewComponent implements OnChanges, AfterViewInit {
           let nbNotes = music.rhythm.values.map(v => v.ticks).reduce((p, c) => p + c, 0) / smallest;
           let occupy = music.rhythm.span / smallest;
           
-          currentTupletsPerMeasure.push(new Vex.Flow.Tuplet(currentMusicNotes, {ratioed: false, num_notes: nbNotes, notes_occupied:occupy}));
+          currentTupletsPerMeasure.push(new Tuplet(currentMusicNotes, {ratioed: false, num_notes: nbNotes, notes_occupied:occupy}));
         }
 
         ticks += music.rhythm.span;
@@ -242,9 +245,9 @@ export class ScoreViewComponent implements OnChanges, AfterViewInit {
 
       // fine tune stave widths
       notes_per_measure.forEach((m, i) => {
-        // Precalculate min width using Vex.Flow.Formatter
-        let vf = new Vex.Flow.Formatter();
-        let voice = new Vex.Flow.Voice({ num_beats: this.timeSignature.beatsPerMeasure, beat_value: Value.WHOLE_TICKS / this.timeSignature.beat.ticks });
+        // Precalculate min width using Formatter
+        let vf = new Formatter();
+        let voice = new Voice({ num_beats: this.timeSignature.beatsPerMeasure, beat_value: Value.WHOLE_TICKS / this.timeSignature.beat.ticks });
         voice.addTickables(m);
         // If we show only pitches, we will remove rests so we might have incomplete voices
         if (this.showOnlyPitches) {
@@ -269,7 +272,7 @@ export class ScoreViewComponent implements OnChanges, AfterViewInit {
       });
       // Add an end bar at the latest stave and provide room for it
       if (!this.computedTimeSignature) {
-        this.staves[this.staves.length - 1].setEndBarType(Vex.Flow.Barline.type.END);
+        this.staves[this.staves.length - 1].setEndBarType(Barline.type.END);
         this.staves[this.staves.length - 1].setWidth(this.staves[this.staves.length - 1].getWidth() + 20);
       }
 
@@ -302,10 +305,10 @@ export class ScoreViewComponent implements OnChanges, AfterViewInit {
     if (this.displayDiv == null) {
       return;
     }
-    const div: HTMLElement = this.displayDiv.nativeElement;
+    const div: HTMLDivElement = this.displayDiv.nativeElement;
     div.childNodes.forEach(child => div.removeChild(child));
     // Get our context to this element
-    const renderer = new Vex.Flow.Renderer(div, Vex.Flow.Renderer.Backends.SVG);
+    const renderer = new Renderer(div, Renderer.Backends.SVG);
     const ctx = renderer.getContext();
 
     // Draw measures
@@ -314,11 +317,11 @@ export class ScoreViewComponent implements OnChanges, AfterViewInit {
       stave.setContext(ctx).draw();
 
       // Then create beams, if requested.
-      const beams = this.showOnlyPitches ? [] : Vex.Flow.Beam.applyAndGetBeams(this.voices[i], undefined,
-        Vex.Flow.Beam.getDefaultBeamGroups(this.timeSignature.beatsPerMeasure.toString().trim() + '/' + (Value.WHOLE_TICKS / this.timeSignature.beat.ticks)));
+      const beams = this.showOnlyPitches ? [] : Beam.applyAndGetBeams(this.voices[i], undefined,
+        Beam.getDefaultBeamGroups(this.timeSignature.beatsPerMeasure.toString().trim() + '/' + (Value.WHOLE_TICKS / this.timeSignature.beat.ticks)));
 
       // Instantiate a `Formatter` and format the notes.
-      new Vex.Flow.Formatter()
+      new Formatter()
         .joinVoices([this.voices[i]])
         .formatToStave([this.voices[i]], stave, { align_rests: false, context: ctx });
 
