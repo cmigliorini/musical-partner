@@ -35,29 +35,26 @@ export class ScaleNoteGeneratorService {
     let scaleNotes: ScaleNote[] = [];
     let previousInterval: number;
     let currentInterval: number;
-    rhythm.forEach(r => r.values.forEach(value => {
+    rhythm.slice().reverse().forEach(r => r.values.slice().reverse().forEach(value => {
       let nextScaleNote: ScaleNote;
-      if (value.isRest) {
+      // We don't change degree as long as we're on a rest, so we respect maxInterval across rests
+      if (value.isRest && currentScaleNote !== null) {
         nextScaleNote = currentScaleNote;
       }
       else {
-        // Unless maxInterval==0, we'll retry until we don't have more than 2 successive identical notes
+        // Unless we don't have a choice, we'll retry until we don't have more than 2 successive identical notes
         // algorithm is ugly but to date i could not find a better one.
+        const allowRepeatedNotes = this.lowestDegree === this.highestDegree || this.settings.maxInterval === 0;
         do {
           nextScaleNote = this.findNextDegree(currentScaleNote);
           currentInterval = currentScaleNote ? nextScaleNote.degree - currentScaleNote.degree : undefined;
-        } while (this.settings.maxInterval !== 0 && (this.settings.highestPitch !== this.settings.lowestPitch)
-        && previousInterval === 0 && currentInterval === 0)
+        } while (!allowRepeatedNotes && previousInterval === 0 && currentInterval === 0)
       }
       // Move backward
       currentScaleNote = nextScaleNote;
       previousInterval = currentInterval;
       scaleNotes.unshift(currentScaleNote);
     }));
-    // FIXME: sometimes last (first generated) note is null!!
-    const nullNotes = scaleNotes.map((note, index) => note === null ? index : null).filter((note) => note !== null);
-    if (nullNotes.length)
-      console.debug("FOUND null notes ", nullNotes);
 
     return scaleNotes;
   }
@@ -76,8 +73,8 @@ export class ScaleNoteGeneratorService {
    * Pick a random note, between lowest and highest
    */
   private findRandomFirstDegree(): ScaleNote {
-    const amplitude: number = this.settings.scale.fromPitch(this.settings.highestPitch).degree - this.settings.scale.fromPitch(this.settings.lowestPitch).degree;
-    const degree: number = this.settings.scale.fromPitch(this.settings.lowestPitch).degree + Math.floor(Math.random() * amplitude + 0.99);
+    const amplitude: number = this.highestDegree - this.lowestDegree;
+    const degree: number = this.lowestDegree + Math.floor(Math.random() * amplitude + 0.99);
     // No alteration for first note. This might change in the future, but you know...
     // console.debug("found a random starting note");
     return new ScaleNote(degree, null);

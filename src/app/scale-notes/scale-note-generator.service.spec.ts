@@ -33,7 +33,17 @@ describe('ScaleNoteGeneratorService', () => {
     valueGeneratorSettings.timeSignature = new TimeSignature(4, Value.QUARTER);
     rhythm = new ValueGeneratorService().generateRhythm(valueGeneratorSettings);
   });
-
+  it('should not fail if last note is a rest', ()=> {
+    let mySettings: ScaleNoteGeneratorSettings = new ScaleNoteGeneratorSettings();
+    mySettings.scale = new Scale(new ScaleNote(0, null), Mode.Minor);
+    mySettings.nbAccidentals = 0;
+    mySettings.lowestPitch = mySettings.scale.toPitch(new ScaleNote(40, null));
+    mySettings.highestPitch = mySettings.scale.toPitch(new ScaleNote(72, null));
+    mySettings.maxInterval = 5;
+    let scaleNotes: ScaleNote[] = new ScaleNoteGeneratorService(mySettings).generateScaleNotes([new Rhythm([Value.QUARTER, Value.QUARTER_REST])]);
+    expect(scaleNotes).toHaveSize(2);
+    expect(scaleNotes[1]).not.toBeNull();
+  });
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
@@ -47,18 +57,16 @@ describe('ScaleNoteGeneratorService', () => {
     mySettings.nbAccidentals = 0;
     mySettings.lowestPitch = mySettings.scale.toPitch(new ScaleNote(40, null));
     mySettings.highestPitch = mySettings.scale.toPitch(new ScaleNote(72, null));
-    mySettings.maxInterval = 0;
-    for (let _ of Array(1)) {
+    for (let interval of Array.from(Array(12).keys()).map(x => x)) {
+      mySettings.maxInterval = interval;
       let scaleNotes: ScaleNote[] = new ScaleNoteGeneratorService(mySettings).generateScaleNotes(rhythm);
       const nbValues = rhythm.map((r) => r.values.length).reduce((l1, l2) => l1 + l2);
-      const nullNotes = scaleNotes.map((note, index) => note === null ? index : null).filter((note) => note !== null);
-      if (nullNotes.length)
-        console.debug("FOUND null notes ", nullNotes);
       expect(scaleNotes.filter((note) => note !== null).length).toEqual(scaleNotes.length);
       expect(scaleNotes.filter((note) => note !== null).length).toEqual(nbValues);
-      let maxDegree: number = scaleNotes.map(a => a.degree).reduce((a, b) => Math.max(a, b));
-      let minDegree: number = scaleNotes.map(a => a.degree).reduce((a, b) => Math.min(a, b));
-      expect(maxDegree - minDegree).toBe(0);
+      const firstNotes = scaleNotes.slice(0, -1);
+      const secondNotes = scaleNotes.slice(1);
+      let maxInterval: number = firstNotes.map((a, i) => Math.abs(a.degree - secondNotes[i].degree)).reduce((a, b) => Math.max(a, b));
+      expect(maxInterval).toBeLessThanOrEqual(maxInterval);
     }
   });
   it('should fit between lowest and highest note, respect maxInterval, and have an equiprobability over all intervals', () => {
