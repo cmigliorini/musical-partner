@@ -12,7 +12,6 @@ import { TimeSignature } from './values/time-signature';
 import { Rhythm } from './rhythm/rhythm';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Mode } from './scale-notes/mode.enum';
-import { Pitch } from './models/pitch';
 
 @Component({
   selector: 'app-root',
@@ -26,8 +25,10 @@ export class AppComponent implements OnInit {
   });
   title = 'ear-partner';
   notes: Music[];
-  lowestNote: Music[];
-  highestNote: Music[];
+  lowestScaleNote: ScaleNote = new ScaleNote(7 * 5, null);
+  lowestNote: Music[] = this.makeSingleNoteMusic(this.lowestScaleNote);
+  highestScaleNote: ScaleNote = new ScaleNote(7 * 5 + 4, null);
+  highestNote: Music[] = this.makeSingleNoteMusic(this.highestScaleNote);
   musicSettings: MusicGeneratorSettings;
   intervalNames: string[] = ['', 'seconde', 'tierce', 'quarte', 'quinte', 'sixte'];
   intervals: string[];
@@ -43,7 +44,6 @@ export class AppComponent implements OnInit {
   rhythmicMode: ValueGeneratorSettings.RhythmicMode;
   nbBeats: number;
   musicPlayBeatValue: Value;
-
   // Playback options
   bpm: number;
   readonly minBpm: number = 30;
@@ -59,8 +59,8 @@ export class AppComponent implements OnInit {
     // ScaleNote Generator settings
     this.musicSettings.scaleNoteSettings = new ScaleNoteGeneratorSettings();
     this.musicSettings.scaleNoteSettings.scale = new Scale(new ScaleNote(0, null), Mode.Major);
-    this.musicSettings.scaleNoteSettings.lowestPitch = this.cMajorScale.toPitch(new ScaleNote(7 * 5, null));
-    this.musicSettings.scaleNoteSettings.highestPitch = this.cMajorScale.toPitch(new ScaleNote(7 * 5 + 4, null));
+    this.musicSettings.scaleNoteSettings.lowestPitch = this.cMajorScale.toPitch(this.lowestScaleNote);
+    this.musicSettings.scaleNoteSettings.highestPitch = this.cMajorScale.toPitch(this.highestScaleNote);
     this.musicSettings.scaleNoteSettings.maxInterval = 2;
     this.musicSettings.scaleNoteSettings.nbAccidentals = 0;
     // Value Generator Settings
@@ -136,20 +136,20 @@ export class AppComponent implements OnInit {
     }
   }
   adjustLowestNote(by: number) {
-    if (this.musicSettings.scaleNoteSettings.lowestPitch.key + by >
-       this.musicSettings.scaleNoteSettings.highestPitch.key) {
+    if (this.lowestScaleNote.degree + by > this.highestScaleNote.degree) {
       return;
     }
-    this.musicSettings.scaleNoteSettings.lowestPitch = new Pitch(this.musicSettings.scaleNoteSettings.lowestPitch.key + by);
-    this.lowestNote = this.makeSingleNoteMusic(this.cMajorScale.fromPitch(this.musicSettings.scaleNoteSettings.lowestPitch));
+    this.lowestScaleNote.degree += by;
+    this.musicSettings.scaleNoteSettings.lowestPitch = this.cMajorScale.toPitch(this.lowestScaleNote);
+    this.lowestNote = this.makeSingleNoteMusic(this.lowestScaleNote);
   }
   adjustHighestNote(by: number) {
-    if (this.musicSettings.scaleNoteSettings.highestPitch.key + by <
-       this.musicSettings.scaleNoteSettings.lowestPitch.key) {
+    if (this.highestScaleNote.degree + by < this.lowestScaleNote.degree) {
       return;
     }
-    this.musicSettings.scaleNoteSettings.highestPitch = new Pitch(this.musicSettings.scaleNoteSettings.highestPitch.key + by);
-    this.highestNote = this.makeSingleNoteMusic(this.cMajorScale.fromPitch(this.musicSettings.scaleNoteSettings.highestPitch));
+    this.highestScaleNote.degree += by;
+    this.musicSettings.scaleNoteSettings.highestPitch = this.cMajorScale.toPitch(this.highestScaleNote);
+    this.highestNote = this.makeSingleNoteMusic(this.highestScaleNote);
   }
   adjustMaxInterval(by: number) {
     if (this.musicSettings.scaleNoteSettings.maxInterval + by < 1 || this.musicSettings.scaleNoteSettings.maxInterval + by > 5) {
