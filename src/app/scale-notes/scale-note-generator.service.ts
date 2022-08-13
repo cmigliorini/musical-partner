@@ -55,7 +55,7 @@ export class ScaleNoteGeneratorService {
       scaleNotes.unshift(currentScaleNote);
     }));
     // FIXME: sometimes last (first generated) note is null!!
-    const nullNotes = scaleNotes.map((note, index)=>note === null ? index : null).filter((note)=>note !== null);
+    const nullNotes = scaleNotes.map((note, index) => note === null ? index : null).filter((note) => note !== null);
     if (nullNotes.length)
       console.debug("FOUND null notes ", nullNotes);
 
@@ -65,19 +65,10 @@ export class ScaleNoteGeneratorService {
    * Try to get a tonic in the allowed range, if not return null
    */
   private findTonicIfPossible(): ScaleNote {
-    // TODO: find a better method. Probably by converting pitches into current scale and determining if
-    // there is a tonic between them. use lowestDegree and highestDegree!
-
-    // is there an X such as fundamentalPitch + X * 12 comprised between lowestPitch and highestPitch ?
-    const highestOctave: number = this.settings.highestPitch.getOctave();
-    if (this.settings.scale.fundamentalPitch + 12* highestOctave >= this.settings.lowestPitch.key &&
-      this.settings.scale.fundamentalPitch + 12* highestOctave <= this.settings.highestPitch.key) {
-        return new ScaleNote(7 * highestOctave, null);
-      }
-    const lowestOctave = this.settings.lowestPitch.getOctave();
-    if (this.settings.scale.fundamentalPitch + 12* lowestOctave >= this.settings.lowestPitch.key &&
-      this.settings.scale.fundamentalPitch + 12* lowestOctave <= this.settings.highestPitch.key) {
-        return new ScaleNote(7 * lowestOctave, null);
+    const octaveH = Math.floor(this.highestDegree / 7);
+    const octaveL = Math.floor(this.lowestDegree / 7);
+    if (octaveH > octaveL || this.lowestDegree % 7 == 0) {
+      return new ScaleNote(7 * octaveH, null);
     }
     return null;
   }

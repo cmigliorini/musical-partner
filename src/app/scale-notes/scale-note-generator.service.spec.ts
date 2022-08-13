@@ -28,9 +28,9 @@ describe('ScaleNoteGeneratorService', () => {
     service = new ScaleNoteGeneratorService(settings);
 
     let valueGeneratorSettings: ValueGeneratorSettings = new ValueGeneratorSettings();
-    valueGeneratorSettings.nbBeats=5000;
+    valueGeneratorSettings.nbBeats = 5000;
     valueGeneratorSettings.allowedRhythms = ValueGeneratorSettings.getStandardRhythms(ValueGeneratorSettings.RhythmicMode.Binary);
-    valueGeneratorSettings.timeSignature= new TimeSignature(4, Value.QUARTER);
+    valueGeneratorSettings.timeSignature = new TimeSignature(4, Value.QUARTER);
     rhythm = new ValueGeneratorService().generateRhythm(valueGeneratorSettings);
   });
 
@@ -50,12 +50,12 @@ describe('ScaleNoteGeneratorService', () => {
     mySettings.maxInterval = 0;
     for (let _ of Array(1)) {
       let scaleNotes: ScaleNote[] = new ScaleNoteGeneratorService(mySettings).generateScaleNotes(rhythm);
-      const nbValues = rhythm.map((r)=>r.values.length).reduce((l1,l2)=>l1+l2);
-      const nullNotes = scaleNotes.map((note, index)=>note === null ? index : null).filter((note)=>note !== null);
+      const nbValues = rhythm.map((r) => r.values.length).reduce((l1, l2) => l1 + l2);
+      const nullNotes = scaleNotes.map((note, index) => note === null ? index : null).filter((note) => note !== null);
       if (nullNotes.length)
         console.debug("FOUND null notes ", nullNotes);
-      expect(scaleNotes.filter((note)=>note !== null).length).toEqual(scaleNotes.length);
-      expect(scaleNotes.filter((note)=>note !== null).length).toEqual(nbValues);
+      expect(scaleNotes.filter((note) => note !== null).length).toEqual(scaleNotes.length);
+      expect(scaleNotes.filter((note) => note !== null).length).toEqual(nbValues);
       let maxDegree: number = scaleNotes.map(a => a.degree).reduce((a, b) => Math.max(a, b));
       let minDegree: number = scaleNotes.map(a => a.degree).reduce((a, b) => Math.min(a, b));
       expect(maxDegree - minDegree).toBe(0);
@@ -94,14 +94,16 @@ describe('ScaleNoteGeneratorService', () => {
     const cMajorScale = new Scale(new ScaleNote(0, null), Mode.Major);
     for (let pitchTonic of Array.from(Array(70).keys()).map(x => x)) {
       myTonicSettings.scale = new Scale(cMajorScale.fromPitch(new Pitch(pitchTonic)), Mode.Major);
-      // Test 12 different offsets, all including a single tonic
-      for (let lowestOffset of Array.from(Array(12).keys()).map(x => x)) {
-        myTonicSettings.lowestPitch = new Pitch(pitchTonic + lowestOffset);
-        myTonicSettings.highestPitch = new Pitch(pitchTonic + lowestOffset + 11);
-        let iscaleNotes: ScaleNote[] = new ScaleNoteGeneratorService(myTonicSettings).generateScaleNotes(tonicRhythm);
-        expect(iscaleNotes).toHaveSize(1);
-        // degree is interpreted in requested scale, so tonic is always going to be first degree
-        expect(iscaleNotes[0].degree % 7).toEqual(0);
+      // Test 12 different offsets and 35 different ambituses, all including at least one tonic
+      for (let ambitus of Array.from(Array(35).keys()).map(x => x + 11)) {
+        for (let lowestOffset of Array.from(Array(12).keys()).map(x => x)) {
+          myTonicSettings.lowestPitch = new Pitch(pitchTonic + lowestOffset);
+          myTonicSettings.highestPitch = new Pitch(pitchTonic + lowestOffset + ambitus);
+          let iscaleNotes: ScaleNote[] = new ScaleNoteGeneratorService(myTonicSettings).generateScaleNotes(tonicRhythm);
+          expect(iscaleNotes).toHaveSize(1);
+          // degree is interpreted in requested scale, so tonic is always going to be first degree
+          expect(iscaleNotes[0].degree % 7).toEqual(0);
+        }
       }
     }
   });
