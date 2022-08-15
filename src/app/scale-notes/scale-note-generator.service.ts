@@ -111,6 +111,10 @@ export class ScaleNoteGeneratorService {
     if (this.settings.maxInterval >= 1 && tonic.degree - 1 >= this.lowestDegree) {
       return new ScaleNote(tonic.degree - 1, null);
     }
+    // upper leading tone
+    if (this.settings.maxInterval >= 1 && tonic.degree + 1 <= this.highestDegree) {
+      return new ScaleNote(tonic.degree + 1, null);
+    }
     return null;
   }
   /**
