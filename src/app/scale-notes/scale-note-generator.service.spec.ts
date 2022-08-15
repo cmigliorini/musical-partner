@@ -33,7 +33,7 @@ describe('ScaleNoteGeneratorService', () => {
     valueGeneratorSettings.timeSignature = new TimeSignature(4, Value.QUARTER);
     rhythm = new ValueGeneratorService().generateRhythm(valueGeneratorSettings);
   });
-  it('should not fail if last note is a rest', ()=> {
+  it('should not fail if first and/or last notes are rests', () => {
     let mySettings: ScaleNoteGeneratorSettings = new ScaleNoteGeneratorSettings();
     mySettings.scale = new Scale(new ScaleNote(0, null), Mode.Minor);
     mySettings.nbAccidentals = 0;
@@ -43,6 +43,19 @@ describe('ScaleNoteGeneratorService', () => {
     let scaleNotes: ScaleNote[] = new ScaleNoteGeneratorService(mySettings).generateScaleNotes([new Rhythm([Value.QUARTER, Value.QUARTER_REST])]);
     expect(scaleNotes).toHaveSize(2);
     expect(scaleNotes[1]).not.toBeNull();
+    scaleNotes = new ScaleNoteGeneratorService(mySettings).generateScaleNotes([new Rhythm([Value.QUARTER_REST, Value.QUARTER])]);
+    expect(scaleNotes).toHaveSize(2);
+    expect(scaleNotes[0]).not.toBeNull();
+    scaleNotes = new ScaleNoteGeneratorService(mySettings).generateScaleNotes([new Rhythm([Value.QUARTER_REST, Value.QUARTER, Value.QUARTER_REST])]);
+    expect(scaleNotes).toHaveSize(3);
+    expect(scaleNotes[0]).not.toBeNull();
+    expect(scaleNotes[1]).not.toBeNull();
+    expect(scaleNotes[2]).not.toBeNull();
+    // Should also return valid ScaleNotes if we have all rests 
+    scaleNotes = new ScaleNoteGeneratorService(mySettings).generateScaleNotes([new Rhythm([Value.QUARTER_REST, Value.QUARTER_REST, Value.QUARTER_REST,
+    Value.QUARTER_REST, Value.QUARTER_REST, Value.QUARTER_REST])]);
+    expect(scaleNotes).toHaveSize(6);
+    expect(scaleNotes.filter(v => v === null || v === undefined).length).toEqual(0);
   });
   it('should be created', () => {
     expect(service).toBeTruthy();
@@ -65,7 +78,7 @@ describe('ScaleNoteGeneratorService', () => {
       expect(scaleNotes.filter((note) => note !== null).length).toEqual(nbValues);
       const firstNotes = scaleNotes.slice(0, -1);
       const secondNotes = scaleNotes.slice(1);
-      let maxInterval: number = firstNotes.map((a, i) => Math.abs(a.degree - secondNotes[i].degree)).reduce((a, b) => Math.max(a, b));
+      let maxInterval: number = firstNotes.map((a, i) => Math.abs(a.degree - secondNotes[i].degree)).reduce((a, b) => Math.max(a, b), 0);
       expect(maxInterval).toBeLessThanOrEqual(maxInterval);
     }
   });
@@ -132,7 +145,6 @@ describe('ScaleNoteGeneratorService', () => {
       let iscaleNotes: ScaleNote[] = new ScaleNoteGeneratorService(myTonicSettings).generateScaleNotes(tonicRhythm);
       expect(iscaleNotes).toHaveSize(1);
       // degree is interpreted in requested scale, so tonic is always going to be first degree
-      if (iscaleNotes[0].degree % 7 === 0) console.debug("should NOT have found a tonic with pitchTonic=", pitchTonic);
       expect(iscaleNotes[0].degree % 7).not.toEqual(0);
     }
   });
@@ -140,12 +152,12 @@ describe('ScaleNoteGeneratorService', () => {
 function testMinMaxDegreeInterval(mySettings: ScaleNoteGeneratorSettings, rhythm: Rhythm[]) {
   let scaleNotes: ScaleNote[] = new ScaleNoteGeneratorService(mySettings).generateScaleNotes(rhythm);
   let degrees: number[] = scaleNotes.map(a => a.degree);
-  let maxDegree: number = degrees.reduce((a, b) => Math.max(a, b));
+  let maxDegree: number = degrees.reduce((a, b) => Math.max(a, b), 0);
   expect(maxDegree).toBeLessThanOrEqual(mySettings.scale.fromPitch(mySettings.highestPitch).degree);
-  let minDegree: number = degrees.reduce((a, b) => Math.min(a, b));
+  let minDegree: number = degrees.reduce((a, b) => Math.min(a, b), 1000);
   expect(minDegree).toBeGreaterThanOrEqual(mySettings.scale.fromPitch(mySettings.lowestPitch).degree);
   let intervals: number[] = degrees.map((_a, i, _scaleNotes) => i == 0 ? 0 : (degrees[i] - degrees[i - 1])).slice(1, degrees.length);
-  let maxInterval: number = intervals.reduce((a, b) => Math.max(a, b));
+  let maxInterval: number = intervals.reduce((a, b) => Math.max(a, b), 0);
   expect(maxInterval).toBeLessThanOrEqual(mySettings.maxInterval);
   // Compute intervals frequencies for maxInterval=1
   let frequencies: number[] = [];

@@ -27,37 +27,59 @@ export class ScaleNoteGeneratorService {
 
   }
   /**
-   * generateScaleNotes
+   * Generate scale notes for a given set of `Rhythm`
+   * @param rhythm array of `Rhythms`
+   * @returns array of ScaleNote, one for each value in `rhythm`
    */
   public generateScaleNotes(rhythm: Rhythm[]): ScaleNote[] {
-    // Generate first note -- so if we have a rest, we can use this.
-    let currentScaleNote: ScaleNote = null;
+    // Generate audible notes if any
+    const audibleScaleNotes: ScaleNote[] = this.getAudibleNotes(rhythm);
+    // Fill rests with nulls
     let scaleNotes: ScaleNote[] = [];
-    let previousInterval: number;
-    let currentInterval: number;
-    rhythm.slice().reverse().forEach(r => r.values.slice().reverse().forEach(value => {
-      let nextScaleNote: ScaleNote;
+    rhythm.slice().forEach(r => r.values.slice().map(v => {
+      scaleNotes.unshift(v.isRest ? null : audibleScaleNotes.pop());
+    }));
+    // extends null-regions to the left. Generate a non null default value in case we end
+    // on a rest -- which also provides for all rest rhythms
+    let currentScaleNote: ScaleNote = audibleScaleNotes.length > 0 ? audibleScaleNotes.slice(-1).pop() : this.findNextDegree(null);
+    for (let index = scaleNotes.length - 1; index >= 0; index--) {
+      if (scaleNotes[index] === null) {
+        scaleNotes[index] = currentScaleNote;
+      }
+      currentScaleNote = scaleNotes[index];
+    }
+    return scaleNotes;
+  }
+  /**
+   * Generate scale notes for non rest values
+   * @param rhythm array of `Rhythms`
+   * @returns array of ScaleNote, one for each audible (i.e. not rest) value in `rhythm`
+   */
+  private getAudibleNotes(rhythm: Rhythm[]): ScaleNote[] {
+    let currentScaleNote: ScaleNote = null;
+    let audibleScaleNotes: ScaleNote[] = [];
+    let previousInterval: number = undefined;
+    let currentInterval: number = undefined;
+    // Create all audible notes
+    const nbAudibleNotes = rhythm.slice().map(r => r.values.slice().filter(v => !v.isRest).length).reduce((l1, l2) => l1 + l2, 0);
+    for (let _i of Array(nbAudibleNotes)) {
+      let nextScaleNote: ScaleNote = null;
       // We don't change degree as long as we're on a rest, so we respect maxInterval across rests
-      if (value.isRest && currentScaleNote !== null) {
-        nextScaleNote = currentScaleNote;
-      }
-      else {
-        // Unless we don't have a choice, we'll retry until we don't have more than 2 successive identical notes
-        // algorithm is ugly but to date i could not find a better one.
-        const allowRepeatedNotes = this.lowestDegree === this.highestDegree || this.settings.maxInterval === 0;
-        do {
-          nextScaleNote = this.findNextDegree(currentScaleNote);
-          currentInterval = currentScaleNote ? nextScaleNote.degree - currentScaleNote.degree : undefined;
-        } while (!allowRepeatedNotes && previousInterval === 0 && currentInterval === 0)
-      }
+      // Unless we don't have a choice, we'll retry until we don't have more than 2 successive identical notes
+      // algorithm is ugly but to date i could not find a better one.
+      const allowRepeatedNotes = this.lowestDegree === this.highestDegree || this.settings.maxInterval === 0;
+      do {
+        nextScaleNote = this.findNextDegree(currentScaleNote);
+        currentInterval = currentScaleNote ? nextScaleNote.degree - currentScaleNote.degree : undefined;
+      } while (!allowRepeatedNotes && previousInterval === 0 && currentInterval === 0);
       // Move backward
       currentScaleNote = nextScaleNote;
       previousInterval = currentInterval;
-      scaleNotes.unshift(currentScaleNote);
-    }));
-
-    return scaleNotes;
+      audibleScaleNotes.unshift(currentScaleNote);
+    }
+    return audibleScaleNotes;
   }
+
   /**
    * Try to get a tonic in the allowed range, if not return null
    */
@@ -76,7 +98,6 @@ export class ScaleNoteGeneratorService {
     const amplitude: number = this.highestDegree - this.lowestDegree;
     const degree: number = this.lowestDegree + Math.floor(Math.random() * amplitude + 0.99);
     // No alteration for first note. This might change in the future, but you know...
-    // console.debug("found a random starting note");
     return new ScaleNote(degree, null);
   }
   private findNextDegree(currentScaleNote: ScaleNote): ScaleNote {
