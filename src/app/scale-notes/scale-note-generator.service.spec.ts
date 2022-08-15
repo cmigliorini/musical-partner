@@ -128,6 +128,110 @@ describe('ScaleNoteGeneratorService', () => {
       }
     }
   });
+
+  it('should get a tonic and a lower leading tone', () => {
+    let myTonicSettings: ScaleNoteGeneratorSettings = new ScaleNoteGeneratorSettings();
+    myTonicSettings.scale = new Scale(new ScaleNote(0, null), Mode.Major);
+    // highestNote and lowestNote are interpreted in C scale
+    myTonicSettings.maxInterval = 1;
+
+    let tonicRhythm = [new Rhythm([Value.QUARTER, Value.QUARTER])];
+    const cMajorScale = new Scale(new ScaleNote(0, null), Mode.Major);
+    // Major
+    for (let pitchTonic of Array.from(Array(70).keys()).map(x => x + 12)) {
+      myTonicSettings.scale = new Scale(cMajorScale.fromPitch(new Pitch(pitchTonic)), Mode.Major);
+      myTonicSettings.lowestPitch = new Pitch(pitchTonic - 2);
+      myTonicSettings.highestPitch = new Pitch(pitchTonic + 9);
+      let iscaleNotes: ScaleNote[] = new ScaleNoteGeneratorService(myTonicSettings).generateScaleNotes(tonicRhythm);
+      expect(iscaleNotes).toHaveSize(2);
+      // degree is interpreted in requested scale, so tonic is always going to be first degree
+      expect(iscaleNotes[1].degree % 7).toEqual(0);
+      expect(iscaleNotes[0].degree).toEqual(iscaleNotes[1].degree - 1);
+      if (iscaleNotes[0].degree !== iscaleNotes[1].degree - 1) console.debug(myTonicSettings.lowestPitch,
+        myTonicSettings.highestPitch, myTonicSettings.scale.toPitch(iscaleNotes[1]), iscaleNotes);
+    }
+    // Minor
+    for (let pitchTonic of Array.from(Array(70).keys()).map(x => x + 12)) {
+      myTonicSettings.scale = new Scale(cMajorScale.fromPitch(new Pitch(pitchTonic)), Mode.Minor);
+      myTonicSettings.lowestPitch = new Pitch(pitchTonic - 2);
+      myTonicSettings.highestPitch = new Pitch(pitchTonic + 9);
+      let iscaleNotes: ScaleNote[] = new ScaleNoteGeneratorService(myTonicSettings).generateScaleNotes(tonicRhythm);
+      expect(iscaleNotes).toHaveSize(2);
+      // degree is interpreted in requested scale, so tonic is always going to be first degree
+      expect(iscaleNotes[1].degree % 7).toEqual(0);
+      expect(iscaleNotes[0].degree).toEqual(iscaleNotes[1].degree - 1);
+    }
+  });
+  it('should get a tonic and a lower dominant', () => {
+    let myTonicSettings: ScaleNoteGeneratorSettings = new ScaleNoteGeneratorSettings();
+    myTonicSettings.scale = new Scale(new ScaleNote(0, null), Mode.Major);
+
+    myTonicSettings.maxInterval = 3;
+
+    let tonicRhythm = [new Rhythm([Value.QUARTER, Value.QUARTER])];
+    const cMajorScale = new Scale(new ScaleNote(0, null), Mode.Major);
+    // Major
+    for (let pitchTonic of Array.from(Array(70).keys()).map(x => x + 12)) {
+      myTonicSettings.scale = new Scale(cMajorScale.fromPitch(new Pitch(pitchTonic)), Mode.Major);
+      myTonicSettings.lowestPitch = new Pitch(pitchTonic - 5);
+      myTonicSettings.highestPitch = new Pitch(pitchTonic + 7);
+      let iscaleNotes: ScaleNote[] = new ScaleNoteGeneratorService(myTonicSettings).generateScaleNotes(tonicRhythm);
+      expect(iscaleNotes).toHaveSize(2);
+      // degree is interpreted in requested scale, so tonic is always going to be first degree
+      expect(iscaleNotes[1].degree % 7).toEqual(0);
+      expect(iscaleNotes[0].degree).toEqual(iscaleNotes[1].degree - 3);
+      if (iscaleNotes[0].degree !== iscaleNotes[1].degree - 3) console.debug(myTonicSettings.lowestPitch,
+        myTonicSettings.highestPitch, myTonicSettings.scale.toPitch(iscaleNotes[1]), iscaleNotes);
+    }
+    // Minor
+    for (let pitchTonic of Array.from(Array(70).keys()).map(x => x + 12)) {
+      myTonicSettings.scale = new Scale(cMajorScale.fromPitch(new Pitch(pitchTonic)), Mode.Minor);
+      myTonicSettings.lowestPitch = new Pitch(pitchTonic - 5);
+      myTonicSettings.highestPitch = new Pitch(pitchTonic + 7);
+      let iscaleNotes: ScaleNote[] = new ScaleNoteGeneratorService(myTonicSettings).generateScaleNotes(tonicRhythm);
+      expect(iscaleNotes).toHaveSize(2);
+      // degree is interpreted in requested scale, so tonic is always going to be first degree
+      expect(iscaleNotes[1].degree % 7).toEqual(0);
+      expect(iscaleNotes[0].degree).toEqual(iscaleNotes[1].degree - 3);
+      if (iscaleNotes[0].degree !== iscaleNotes[1].degree - 3) console.debug(myTonicSettings.lowestPitch,
+        myTonicSettings.highestPitch, myTonicSettings.scale.toPitch(iscaleNotes[1]), iscaleNotes);
+    }
+  });
+  it('should get a tonic and an upper dominant', () => {
+    let myTonicSettings: ScaleNoteGeneratorSettings = new ScaleNoteGeneratorSettings();
+    myTonicSettings.scale = new Scale(new ScaleNote(0, null), Mode.Major);
+
+    myTonicSettings.maxInterval = 4;
+
+    let tonicRhythm = [new Rhythm([Value.QUARTER, Value.QUARTER])];
+    const cMajorScale = new Scale(new ScaleNote(0, null), Mode.Major);
+    // Major
+    for (let pitchTonic of Array.from(Array(70).keys()).map(x => x + 12)) {
+      myTonicSettings.scale = new Scale(cMajorScale.fromPitch(new Pitch(pitchTonic)), Mode.Major);
+      myTonicSettings.lowestPitch = new Pitch(pitchTonic);
+      myTonicSettings.highestPitch = new Pitch(pitchTonic + 11);
+      let iscaleNotes: ScaleNote[] = new ScaleNoteGeneratorService(myTonicSettings).generateScaleNotes(tonicRhythm);
+      expect(iscaleNotes).toHaveSize(2);
+      // degree is interpreted in requested scale, so tonic is always going to be first degree
+      expect(iscaleNotes[1].degree % 7).toEqual(0);
+      expect(iscaleNotes[0].degree).toEqual(iscaleNotes[1].degree + 4);
+      if (iscaleNotes[0].degree !== iscaleNotes[1].degree + 4) console.debug(myTonicSettings.lowestPitch,
+        myTonicSettings.highestPitch, myTonicSettings.scale.toPitch(iscaleNotes[1]), iscaleNotes);
+    }
+    // Minor
+    for (let pitchTonic of Array.from(Array(70).keys()).map(x => x + 12)) {
+      myTonicSettings.scale = new Scale(cMajorScale.fromPitch(new Pitch(pitchTonic)), Mode.Minor);
+      myTonicSettings.lowestPitch = new Pitch(pitchTonic);
+      myTonicSettings.highestPitch = new Pitch(pitchTonic + 11);
+      let iscaleNotes: ScaleNote[] = new ScaleNoteGeneratorService(myTonicSettings).generateScaleNotes(tonicRhythm);
+      expect(iscaleNotes).toHaveSize(2);
+      // degree is interpreted in requested scale, so tonic is always going to be first degree
+      expect(iscaleNotes[1].degree % 7).toEqual(0);
+      expect(iscaleNotes[0].degree).toEqual(iscaleNotes[1].degree + 4);
+      if (iscaleNotes[0].degree !== iscaleNotes[1].degree + 4) console.debug(myTonicSettings.lowestPitch,
+        myTonicSettings.highestPitch, myTonicSettings.scale.toPitch(iscaleNotes[1]), iscaleNotes);
+    }
+  });
   it('should NOT get a tonic', () => {
     let myTonicSettings: ScaleNoteGeneratorSettings = new ScaleNoteGeneratorSettings();
     const cMajorScale = new Scale(new ScaleNote(0, null), Mode.Major);

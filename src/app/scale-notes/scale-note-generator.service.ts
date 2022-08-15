@@ -56,13 +56,20 @@ export class ScaleNoteGeneratorService {
    * @returns array of ScaleNote, one for each audible (i.e. not rest) value in `rhythm`
    */
   private getAudibleNotes(rhythm: Rhythm[]): ScaleNote[] {
-    let currentScaleNote: ScaleNote = null;
-    let audibleScaleNotes: ScaleNote[] = [];
-    let previousInterval: number = undefined;
-    let currentInterval: number = undefined;
     // Create all audible notes
     const nbAudibleNotes = rhythm.slice().map(r => r.values.slice().filter(v => !v.isRest).length).reduce((l1, l2) => l1 + l2, 0);
-    for (let _i of Array(nbAudibleNotes)) {
+    // In order to give some musicality to the music, we're going to generate
+    // - final note to be a tonic if possible
+    // - penultimate one to be a dominant (or at least a leading tone, depending on settings)
+    const finalTonic = nbAudibleNotes > 0 ? this.findTonicIfPossible() : null;
+    const penultimateNote = nbAudibleNotes > 1 ? this.getDominantOrLeadingTone(finalTonic) : null;
+    let audibleScaleNotes: ScaleNote[] = [penultimateNote, finalTonic].filter(v => v !== null);
+    let currentScaleNote: ScaleNote = penultimateNote || finalTonic;
+    
+    // Now generate evething else
+    let previousInterval: number = undefined;
+    let currentInterval: number = undefined;
+    for (let _i of Array(nbAudibleNotes - audibleScaleNotes.length)) {
       let nextScaleNote: ScaleNote = null;
       // We don't change degree as long as we're on a rest, so we respect maxInterval across rests
       // Unless we don't have a choice, we'll retry until we don't have more than 2 successive identical notes
@@ -80,6 +87,32 @@ export class ScaleNoteGeneratorService {
     return audibleScaleNotes;
   }
 
+  /**
+   * If provided with a tonic, will return a dominant, or a leading tone, according to current settings
+   * @returns a leading tone, a dominant, or `null` if none can be found
+   */
+  private getDominantOrLeadingTone(tonic: ScaleNote): ScaleNote {
+    // Constraints:
+    // - maxInterval (must be >1 to get a leading tone, >3 to get a dominant)
+    // - lowestDegree, highestDegree: found degree must fit
+    if (this.settings.maxInterval < 1 || tonic === null) {
+      return null;
+    }
+    let degree: number;
+    // Simple cadence
+    if (this.settings.maxInterval >= 3 && tonic.degree - 3 >= this.lowestDegree) {
+      return new ScaleNote(tonic.degree - 3, null);
+    }
+    // "inverted" cadence
+    if (this.settings.maxInterval >= 4 && tonic.degree + 4 <= this.highestDegree) {
+      return new ScaleNote(tonic.degree + 4, null);
+    }
+    // leading tone
+    if (this.settings.maxInterval >= 1 && tonic.degree - 1 >= this.lowestDegree) {
+      return new ScaleNote(tonic.degree - 1, null);
+    }
+    return null;
+  }
   /**
    * Try to get a tonic in the allowed range, if not return null
    */
