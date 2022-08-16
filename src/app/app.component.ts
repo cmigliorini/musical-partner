@@ -49,7 +49,8 @@ export class AppComponent implements OnInit {
   readonly minBpm: number = 30;
   readonly maxBpm: number = 60;
   readonly cMajorScale: Scale = new Scale(new ScaleNote(0, null), Mode.Major);
-  
+  readonly a0 = new ScaleNote(5, null);
+  readonly aMinorScale: Scale = new Scale(this.a0, Mode.Minor);
   constructor(private musicgen: MusicGeneratorService) {
 
   }
@@ -58,7 +59,7 @@ export class AppComponent implements OnInit {
     this.musicSettings = new MusicGeneratorSettings;
     // ScaleNote Generator settings
     this.musicSettings.scaleNoteSettings = new ScaleNoteGeneratorSettings();
-    this.musicSettings.scaleNoteSettings.scale = new Scale(new ScaleNote(0, null), Mode.Major);
+    this.musicSettings.scaleNoteSettings.scale = this.cMajorScale;
     this.musicSettings.scaleNoteSettings.lowestPitch = this.cMajorScale.toPitch(this.lowestScaleNote);
     this.musicSettings.scaleNoteSettings.highestPitch = this.cMajorScale.toPitch(this.highestScaleNote);
     this.musicSettings.scaleNoteSettings.maxInterval = 2;
@@ -87,8 +88,8 @@ export class AppComponent implements OnInit {
     this.rhythmicMode = mode;
     const rhythms: Rhythm[] = ValueGeneratorSettings.getStandardRhythms(mode);
     this.totalRhythms = rhythms.map(r => {
-      let notes: Chord[] = r.values.map(v => Chord.singleNoteChord(new ScaleNote(5, null)));
-      return [new Music(notes, r, new Scale(new ScaleNote(0, null), Mode.Major))];
+      let notes: Chord[] = r.values.map(v => Chord.singleNoteChord(this.a0));
+      return [new Music(notes, r, this.cMajorScale)];
     });
     this.selectedRhythms = Array(rhythms.length).fill(false);
     this.selectedRhythms[0] = true;
@@ -123,15 +124,15 @@ export class AppComponent implements OnInit {
       .map(music => music.notes.filter((n, iNote) => !music.rhythm.values[iNote].isRest))
       .reduce((prevChord, currChord) => prevChord.concat(currChord), [])
       // Keep only first note
-      .slice(0, 1), new Rhythm([Value.QUARTER]), new Scale(new ScaleNote(0, null), Mode.Major))];
+      .slice(0, 1), new Rhythm([Value.QUARTER]), this.cMajorScale)];
   }
   updateMode() {
     switch (this.modeForm.get('mode').value) {
       case Mode.Major:
-        this.musicSettings.scaleNoteSettings.scale = new Scale(new ScaleNote(0, null), Mode.Major);
+        this.musicSettings.scaleNoteSettings.scale = this.cMajorScale;
         break;
       case Mode.Minor:
-        this.musicSettings.scaleNoteSettings.scale = new Scale(new ScaleNote(5, null), Mode.Minor);
+        this.musicSettings.scaleNoteSettings.scale = this.aMinorScale;
         break;
     }
   }
@@ -168,7 +169,7 @@ export class AppComponent implements OnInit {
     this.nbBeats += beatsIncrement * by;
   }
   private makeSingleNoteMusic(scaleNote: ScaleNote): Music[] {
-    return [new Music([Chord.singleNoteChord(scaleNote)], new Rhythm([Value.QUARTER]), new Scale(new ScaleNote(0, null), Mode.Major))];
+    return [new Music([Chord.singleNoteChord(scaleNote)], new Rhythm([Value.QUARTER]), this.cMajorScale)];
   }
   scroll(el) {
     el.scrollIntoView();
