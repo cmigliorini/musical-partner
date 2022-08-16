@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, Input, ViewChild, SimpleChanges, ElementRef } from '@angular/core';
+import { Component, OnChanges, Input, ViewChild, SimpleChanges, ElementRef, AfterViewInit } from '@angular/core';
 import * as Vex from 'vexflow';
 import { Music } from '../music/music';
 import { Value } from '../values/value';
@@ -12,7 +12,7 @@ const cmajor_scale: number[] = [1, 3, 6, 8, 10];
   templateUrl: './score-view.component.html',
   styleUrls: ['./score-view.component.sass']
 })
-export class ScoreViewComponent implements OnInit, OnChanges {
+export class ScoreViewComponent implements OnChanges, AfterViewInit {
   @ViewChild('stave') displayDiv: ElementRef;
 
   // notes are input by other modules
@@ -97,10 +97,6 @@ export class ScoreViewComponent implements OnInit, OnChanges {
       throw new Error('we can\'t calculate dots: duration=' + duration + ', note=' + note);
     }
     return note.toString().concat('d'.repeat(dots));
-  }
-
-  ngOnInit(): void {
-    // Nothing to do here, but method should be present
   }
 
   // Translate input into internal representation, then draw score

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { Music } from '../music/music';
 import { Value } from '../values/value';
 import { Piano } from '@tonejs/piano'
@@ -10,7 +10,7 @@ import * as Tone from "tone";
   styleUrls: ['./music-play.component.sass']
 })
 
-export class MusicPlayComponent implements OnInit, OnChanges {
+export class MusicPlayComponent implements OnChanges {
   @Input() notes: Music[];
   @Input() addMetronome?: boolean;
   @Input() beatValue: Value;
@@ -42,8 +42,6 @@ export class MusicPlayComponent implements OnInit, OnChanges {
 
   }
 
-  ngOnInit(): void {
-  }
   ngOnChanges(): void {
     if (this.notes == null) {
       return;

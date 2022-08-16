@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { Music } from './music/music';
 import { Chord } from './music/note';
 import { Value } from './values/value';
@@ -18,7 +18,7 @@ import { Mode } from './scale-notes/mode.enum';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.sass']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
   eScaleMode: typeof Mode = Mode;
   modeForm = new FormGroup({
     mode: new FormControl(Mode.Major)
@@ -78,7 +78,7 @@ export class AppComponent implements OnInit {
     this.bpm = 50;
   }
 
-  ngAfterViewInit(): void {
+  ngAfterViewInit() : void {
     this.modeForm.get('mode').valueChanges.subscribe((_)=>this.updateMode());
   }
   setRhythmicMode(mode: number) {
