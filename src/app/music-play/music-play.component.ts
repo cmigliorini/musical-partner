@@ -63,12 +63,11 @@ export class MusicPlayComponent implements OnInit, OnChanges {
       // Total number of beats
       const nbTotalTicks: number = this.notes.map(v => v.rhythm.span).reduce((s, t) => s + t);
       const nbTotalBeats: number = nbTotalTicks / this.beatValue.ticks;
-      // console.log('nbTotalTicks {}, nbTotalBeats {}', nbTotalTicks, nbTotalBeats);
 
       const beatTime: number = Tone.Time(this.beatValue.ticks / ticksPerSecond).toSeconds();
 
       let metronomeNotes: { time: number, value:string, pitch:string }[] = [];
-      Array(nbTotalBeats).fill(1).forEach(i => {
+      Array(nbTotalBeats).fill(1).forEach(_i => {
         metronomeNotes.push({ time: metronomeStartTime,  pitch: 'c6', value: '32n' });
         metronomeStartTime += beatTime;
       });

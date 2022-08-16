@@ -77,7 +77,7 @@ export class ValueGeneratorSettings {
       case ValueGeneratorSettings.RhythmicMode.Ternary:
         return ValueGeneratorSettings.standardRhythms[rhythmicMode];
       default:
-        throw "unsupported rhythmic mode:" + rhythmicMode;
+        throw new Error("unsupported rhythmic mode:" + rhythmicMode);
     }
   }
 }

@@ -88,7 +88,7 @@ export class AppComponent implements OnInit {
     this.rhythmicMode = mode;
     const rhythms: Rhythm[] = ValueGeneratorSettings.getStandardRhythms(mode);
     this.totalRhythms = rhythms.map(r => {
-      let notes: Chord[] = r.values.map(v => Chord.singleNoteChord(this.a0));
+      let notes: Chord[] = r.values.map(_v => Chord.singleNoteChord(this.a0));
       return [new Music(notes, r, this.cMajorScale)];
     });
     this.selectedRhythms = Array(rhythms.length).fill(false);
@@ -106,7 +106,7 @@ export class AppComponent implements OnInit {
       this.bpm = 50;
     }
     else {
-      throw "I don't handle rhytmic mode " + mode;
+      throw new Error("I don't handle rhytmic mode " + mode);
     }
     this.notes = undefined;
     this.firstNote = undefined;
@@ -120,8 +120,8 @@ export class AppComponent implements OnInit {
     this.notes = this.musicgen.generateNotes(this.musicSettings);
     // Extract first note. This will probably break tuples, but we're not going to display this anyway
     this.firstNote = [new Music(this.notes
-      // extract only notes, ignoring rests -- this breaks tuples if any.
-      .map(music => music.notes.filter((n, iNote) => !music.rhythm.values[iNote].isRest))
+      // extract only notes, ignoring rests -- ⚠ this breaks tuples if any.
+      .map(music => music.notes.filter((_n, iNote) => !music.rhythm.values[iNote].isRest))
       .reduce((prevChord, currChord) => prevChord.concat(currChord), [])
       // Keep only first note
       .slice(0, 1), new Rhythm([Value.QUARTER]), this.cMajorScale)];

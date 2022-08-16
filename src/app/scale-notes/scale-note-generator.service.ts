@@ -17,8 +17,8 @@ export class ScaleNoteGeneratorService {
   constructor(settings: ScaleNoteGeneratorSettings) {
     this.settings = _.cloneDeep(settings);
     if (typeof this.settings.nbAccidentals === 'number' && this.settings.nbAccidentals !== 0) {
-      throw '';
-    };
+      throw new Error("I don't handle accidentals for now");
+    }
     // Interpret lowest and higest note in C Major scale
     if (this.settings && this.settings.scale && this.settings.highestPitch && this.settings.lowestPitch) {
       this.highestDegree = this.settings.scale.fromPitch(this.settings.highestPitch).degree;

@@ -1,5 +1,4 @@
 import { Component, OnInit, OnChanges, Input, ViewChild, SimpleChanges, ElementRef } from '@angular/core';
-//import 'vexflow';
 import * as Vex from 'vexflow';
 import { Music } from '../music/music';
 import { Value } from '../values/value';
@@ -52,12 +51,12 @@ export class ScoreViewComponent implements OnInit, OnChanges {
   private noteDuration(duration: number): string {
     // We don't do bigger than WHOLE.ticks, nor smaller than SIXTEENTH.ticks.
     if (duration > Value.WHOLE.ticks || duration < Value.SIXTYFOURTH.ticks) {
-      throw 'invalid duration ' + duration.toString();
+      throw new Error('invalid duration ' + duration.toString());
     }
     // First, find base note. we start from WHOLE.ticks, and go down...
     // TODO: make it a loop, remove instead of divide...
-    let note: number = 1;
-    let remainder: number = 0;
+    let note: number;
+    let remainder: number;
     if (duration == Value.WHOLE.ticks) {
       note = 1;
       remainder = 0;
@@ -80,8 +79,11 @@ export class ScoreViewComponent implements OnInit, OnChanges {
       note = 64;
       remainder = duration % Value.SIXTYFOURTH.ticks;
       if (remainder != 0) {
-        throw 'we don\'t dot SIXTYFOURTHs';
+        throw new Error('I don\'t dot SIXTYFOURTHs');
       }
+    } else {
+      note = 1
+      remainder = 0;
     }
     // Now we need to define dots. We'll divide remainder by 2 until it's either too small (we don't dot 32nd => throw) or zero.
     let divisor: number = Value.WHOLE_TICKS / note;
@@ -92,16 +94,13 @@ export class ScoreViewComponent implements OnInit, OnChanges {
       remainder = remainder % divisor;
     }
     if (remainder != 0) {
-      throw 'we can\'t calculate dots: duration=' + duration + ', note=' + note;
+      throw new Error('we can\'t calculate dots: duration=' + duration + ', note=' + note);
     }
     return note.toString().concat('d'.repeat(dots));
   }
 
-  constructor() {
-  }
-
   ngOnInit(): void {
-
+    // Nothing to do here, but method should be present
   }
 
   // Translate input into internal representation, then draw score
@@ -165,7 +164,7 @@ export class ScoreViewComponent implements OnInit, OnChanges {
         }
         // First We need to find out whether current_stave will hold our rhythm, or throw
         if (music.rhythm.span > this.timeSignature.getTotalTicks() - ticks) {
-          throw "current rhythm will make current stave overflow:" + music.rhythm.span + ' ' + this.timeSignature.getTotalTicks() + ' ' + ticks;
+          throw new Error("current rhythm will make current stave overflow:" + music.rhythm.span + ' ' + this.timeSignature.getTotalTicks() + ' ' + ticks);
         }
         // We're good, let's add the rhythm's notes to current stave
         // rythm->notes->key[] translated to strings + duration -> stavenote
@@ -256,16 +255,17 @@ export class ScoreViewComponent implements OnInit, OnChanges {
           voice.setStrict(false);
         }
         this.voices.push(voice);
-        let width = vf.preCalculateMinTotalWidth([voice]);
+        const width = vf.preCalculateMinTotalWidth([voice]);
         // Adjust width to accomodate for Vex.Flow's behaviour:
         // 1- apparently it more or less adjusts the smallest value to a fixed minimal width
-        let minValue: number = m.map(v => v.getTicks().value()).reduce((a, b) => Math.min(a, b), Value.WHOLE_TICKS);
-        let multiplicationFactor: number = m.length > 1 ? this.multiplicationFactor(minValue) : 1;
+        const minValue: number = m.map(v => v.getTicks().value()).reduce((a, b) => Math.min(a, b), Value.WHOLE_TICKS);
+        const multiplicationFactor: number = m.length > 1 ? this.multiplicationFactor(minValue) : 1;
+        const extraWidth = (this.displayClef ? 30 : 0) + (this.displayTimeSignature ? 30 : 0);
         this.staves[i].setWidth(width * multiplicationFactor
           // 2- it shrinks 1-note staves to an extreme narrowness
           + (m.length > 1 ? 30 : 60)
           // 3- it does not handle clefs and time signature
-          + (i == 0 ? ((this.displayClef ? 30 : 0) + (this.displayTimeSignature ? 30 : 0)) : 0));
+          + (i == 0 ? extraWidth : 0));
 
         // Set start X based on previous stave
         // TODO: also allow staves to be stacked on several lines based on an externally provided Max Width

@@ -102,7 +102,7 @@ describe('ScaleNoteGeneratorService', () => {
     mySettings.highestPitch = mySettings.scale.toPitch(new ScaleNote(48, null));
     mySettings.lowestPitch = mySettings.scale.toPitch(new ScaleNote(40, null));
     mySettings.maxInterval = 10;
-    expect(function () { new ScaleNoteGeneratorService(mySettings) }).toThrow();
+    expect(() => new ScaleNoteGeneratorService(mySettings)).toThrow();
   });
   it('should get a tonic', () => {
     let myTonicSettings: ScaleNoteGeneratorSettings = new ScaleNoteGeneratorSettings();
@@ -298,6 +298,12 @@ function testMinMaxDegreeInterval(mySettings: ScaleNoteGeneratorSettings, rhythm
   expect(maxInterval).toBeLessThanOrEqual(mySettings.maxInterval);
   // Compute intervals frequencies for maxInterval=1
   let frequencies: number[] = [];
-  intervals.forEach(int => frequencies[int + mySettings.maxInterval] ? frequencies[int + mySettings.maxInterval] += 1 : frequencies[int + mySettings.maxInterval] = 1);
+  intervals.forEach(int => {
+    if (frequencies[int + mySettings.maxInterval]) {
+      frequencies[int + mySettings.maxInterval] += 1;
+    } else {
+      frequencies[int + mySettings.maxInterval] = 1;
+    }
+  });
 }
 
