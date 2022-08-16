@@ -7,8 +7,8 @@
       <p><span class="badge badge-info">Nouveau</span><em>
           Depuis l'été 2022, je sais te proposer des dictées majeures et mineures, ainsi que de nouveaux rythmes, qui devraient couvrir le cycle II.</em></p>
       <p><span class="badge badge-warning">Attention</span><em>
-          Malheureusement, je ne fonctionne pas sur le navigateur Safari (macOS) : si tu utilises un ordinateur, préfère Chrome ou
-          Firefox. Mais tu peux m'utiliser sur un iPhone ou un iPad.</em></p>
+          Malheureusement, je ne fonctionne pas sur le navigateur Safari (macOS) : si tu utilises un ordinateur, préfère Firefox, ou
+          Chrome. Mais tu peux m'utiliser sur un iPhone ou un iPad.</em></p>
     </div>
   </div>
   <div class="row align-items-center">
@@ -49,14 +49,16 @@
             <div class="badge badge-light"><span>Mode</span></div>
           </h2>
           <div>
-            <div class="btn-group  btn-group-toggle" ngbRadioGroup name="radioBasic">
-              <label ngbButtonLabel class="btn-info">
-                  <input ngbButton type="radio" (click)="setMajorMode()"> Majeur
+            <form [formGroup]="modeForm">
+              <div class="btn-group  btn-group-toggle" ngbRadioGroup formControlName="mode">
+              <label ngbButtonLabel [class]="this.modeForm.get('mode').value==eScaleMode.Major?'btn-warning':'btn-light'">
+                  <input ngbButton type="radio" [value]="eScaleMode.Major"> Majeur
               </label>
-              <label ngbButtonLabel class="btn-warning">
-                <input ngbButton type="radio" (click)="setMinorMode()"> Mineur
+              <label ngbButtonLabel [class]="this.modeForm.get('mode').value==eScaleMode.Minor?'btn-warning':'btn-light'">
+                <input ngbButton type="radio" [value]="eScaleMode.Minor"> Mineur
               </label>
             </div>
+            </form>
           </div>
         </div>
         <div class="col-sm-1">
@@ -112,8 +114,13 @@
         </div>
       </div>
     </div>
-  </div>
-  <p><span class="badge badge-info">Note</span> <span> si tu sélectionnes le mode mineur, il y aura des altérations accidentelles à trouver !</span></p>
+  </div><p>
+    <span *ngIf="this.modeForm.get('mode').value==1" >
+      <span class="badge badge-info">Attention</span> <span> Tu as sélectionné
+        le mode mineur, il y aura des altérations accidentelles à trouver !</span>
+      </span>
+      &nbsp;
+  </p>
   <div class="row align-items-center mt-2 pt-2 app-heading">
     <div class="col-sm">
       <h3>
@@ -321,9 +328,9 @@
     </div>
   </div>
   <div class="container">
-    <p><small class="text-muted"><em>&copy; Christophe Migliorini 2020-2022. Ce site a pu voir le jour grâce aux
+    <p><small class="text-muted"><em>&copy; <a href="https://www.linkedin.com/in/christophemigliorini/" target="_blank">Christophe Migliorini</a> 2020-2022. Ce site a pu voir le jour grâce aux
           (ou à cause des) circonstances exceptionnelles du confinement général de la population française décrété en
-          mars 2020, sur une idée et avec l'aide précieuse de Cécile Coqu, musicienne et professeur de formation
+          mars 2020, sur une idée et avec l'aide précieuse de <a href="https://www.linkedin.com/in/cécile-coqu-aa2565236/" target="_blank">Cécile Coqu</a>, musicienne et professeur de formation
           musicale. View code on <a href="https://github.com/cmigliorini/musical-partner/" target="_blank"
             rel="noopener noreferrer">GitHub</a>.</em></small></p>
     <p><small class="text-muted">Uses <a href="https://tonejs.github.io/" target="_blank"

@@ -1,5 +1,3 @@
-import { tick } from '@angular/core/testing';
-
 export class Value {
   static readonly WHOLE_TICKS = 16384;
   static readonly WHOLE = new Value(Value.WHOLE_TICKS);

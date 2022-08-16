@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { Music } from '../music/music';
 import { Value } from '../values/value';
 import { Piano } from '@tonejs/piano'
@@ -10,7 +10,7 @@ import * as Tone from "tone";
   styleUrls: ['./music-play.component.sass']
 })
 
-export class MusicPlayComponent implements OnInit, OnChanges {
+export class MusicPlayComponent implements OnChanges {
   @Input() notes: Music[];
   @Input() addMetronome?: boolean;
   @Input() beatValue: Value;
@@ -42,8 +42,6 @@ export class MusicPlayComponent implements OnInit, OnChanges {
 
   }
 
-  ngOnInit(): void {
-  }
   ngOnChanges(): void {
     if (this.notes == null) {
       return;
@@ -63,12 +61,11 @@ export class MusicPlayComponent implements OnInit, OnChanges {
       // Total number of beats
       const nbTotalTicks: number = this.notes.map(v => v.rhythm.span).reduce((s, t) => s + t);
       const nbTotalBeats: number = nbTotalTicks / this.beatValue.ticks;
-      // console.log('nbTotalTicks {}, nbTotalBeats {}', nbTotalTicks, nbTotalBeats);
 
       const beatTime: number = Tone.Time(this.beatValue.ticks / ticksPerSecond).toSeconds();
 
       let metronomeNotes: { time: number, value:string, pitch:string }[] = [];
-      Array(nbTotalBeats).fill(1).forEach(i => {
+      Array(nbTotalBeats).fill(1).forEach(_i => {
         metronomeNotes.push({ time: metronomeStartTime,  pitch: 'c6', value: '32n' });
         metronomeStartTime += beatTime;
       });
